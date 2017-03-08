@@ -59,3 +59,4 @@ group :development, :test do
 end
 
 gem 'rubocop', '~> 0.47.1', require: false
+gem 'devise'
