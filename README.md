@@ -1,8 +1,24 @@
-# chess-app [![Build Status](https://travis-ci.org/pawn-stars/chess-app.svg?branch=master)](https://travis-ci.org/pawn-stars/chess-app)
+# README
 
-An awesome chess application.
+This README would normally document whatever steps are necessary to get the
+application up and running.
 
-## Requirements
+Things you may want to cover:
 
-* Ruby
-* PostgreSQL
+* Ruby version
+
+* System dependencies
+
+* Configuration
+
+* Database creation
+
+* Database initialization
+
+* How to run the test suite
+
+* Services (job queues, cache servers, search engines, etc.)
+
+* Deployment instructions
+
+* ...
