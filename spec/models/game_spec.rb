@@ -1,7 +1,10 @@
 require 'rails_helper'
 
 RSpec.describe Game, type: :model do
-  it { should have_many(:participations) }
+  context "associations" do
+    it { should have_many(:participations) }
+    it { should have_many(:pieces) }
+  end
 
   describe "#available" do
     it "should include games with one player" do

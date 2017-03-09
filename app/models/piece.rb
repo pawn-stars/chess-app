@@ -1,4 +1,4 @@
 class Piece < ApplicationRecord
   belongs_to :game
-  has_many :pieces
+  has_many :moves
 end
