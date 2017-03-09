@@ -5,5 +5,10 @@ class User < ApplicationRecord
          :recoverable, :rememberable, :trackable, :validatable
 
   has_many :participations
-  has_many :participating_games, through: :participations, source: :games
+  has_many :games, through: :participations
+
+  validates :screen_name, presence: true,
+                          length: { maximum: 16, minimum: 3 },
+                          format: { with: /\A\w+\z/,
+                            message: "only allows letters and numbers" }
 end
