@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170308201633) do
+ActiveRecord::Schema.define(version: 20170309061830) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -25,6 +25,19 @@ ActiveRecord::Schema.define(version: 20170308201633) do
     t.index ["winner"], name: "index_games_on_winner", using: :btree
   end
 
+  create_table "moves", force: :cascade do |t|
+    t.integer  "move_number"
+    t.text     "from_position", default: [],              array: true
+    t.text     "to_position",   default: [],              array: true
+    t.string   "move_type"
+    t.integer  "game_id"
+    t.integer  "piece_id"
+    t.datetime "created_at",                 null: false
+    t.datetime "updated_at",                 null: false
+    t.index ["game_id"], name: "index_moves_on_game_id", using: :btree
+    t.index ["piece_id"], name: "index_moves_on_piece_id", using: :btree
+  end
+
   create_table "participations", force: :cascade do |t|
     t.integer  "user_id"
     t.integer  "game_id"
@@ -32,6 +45,19 @@ ActiveRecord::Schema.define(version: 20170308201633) do
     t.datetime "updated_at", null: false
     t.index ["game_id"], name: "index_participations_on_game_id", using: :btree
     t.index ["user_id", "game_id"], name: "index_participations_on_user_id_and_game_id", using: :btree
+  end
+
+  create_table "pieces", force: :cascade do |t|
+    t.string   "type"
+    t.string   "color"
+    t.text     "start_position", default: [],              array: true
+    t.integer  "row"
+    t.integer  "col"
+    t.boolean  "captured"
+    t.datetime "created_at",                  null: false
+    t.datetime "updated_at",                  null: false
+    t.integer  "game_id"
+    t.index ["game_id"], name: "index_pieces_on_game_id", using: :btree
   end
 
   create_table "users", force: :cascade do |t|
