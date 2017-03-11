@@ -1,0 +1,14 @@
+AllCops:
+  Exclude:
+    - 'config/**/*'
+    - 'db/**/*'
+    - 'vendor/**/*'
+    - 'tmp/**/*'
+    - 'Gemfile'
+
+Style/StringLiterals:
+  IgnoreCopDirectives: true
+  Enabled: false
+
+Documentation:
+  Enabled: false
