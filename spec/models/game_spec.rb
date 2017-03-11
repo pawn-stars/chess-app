@@ -19,7 +19,7 @@ RSpec.describe Game, type: :model do
     end
 
     it "should exclude games with zero players" do
-      Game.create()
+      Game.create
       expect(Game.available.count).to eq(0)
     end
   end
