@@ -9,6 +9,33 @@
   </head>
 
   <body>
+<nav class="navbar navbar-toggleable-md navbar-inverse bg-inverse">
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <a class="navbar-brand" </a>
+      <%= link_to 'Chess App', root_path, class: 'navbar-brand' %>
+
+      <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
+        <ul class="navbar-nav mr-auto mt-2 mt-md-0">
+        </ul>
+        
+  
+      <ul class="nav navbar-nav float-lg-right">
+        <li class="nav-item">
+          <a class="nav-link" </a>
+       <% if user_signed_in? %>
+          <li><%= link_to "Sign Out #{current_user.email}", destroy_user_session_path, method: :delete %></li>
+
+          <% else %>
+          <li><%= link_to 'Sign In', new_user_session_path %></li>
+          <li><%= link_to 'Sign Up', new_user_registration_path %></li>
+        <% end %>  
+      </ul>
+    </div><!-- /.navbar-collapse -->
+</nav>
+
+
 
       <% if notice.present? %>
         <p class="alert alert-info"><%= notice %></p>
