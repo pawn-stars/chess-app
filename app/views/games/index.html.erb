@@ -1,6 +1,14 @@
-<%= button_to "Start A New Game", games_path %>
+<% current_user = User.first %>
+<%= link_to "Start A New Game", new_game_path, class: "btn btn-success" %>
 
 <h1>Join A Game</h1>
+
 <% @games.each do |game| %>
-  <%= @game.white_player_id %>
+  <% user= User.find(game.white_player_id) %>
+  <%= user.screen_name %>
+  <%= form_for game do |f| %>
+    <%= f.hidden_field :black_player_id, value: current_user.id %>
+    <%= f.submit "Join Game" %>
+  <% end %>
+
 <% end %>
