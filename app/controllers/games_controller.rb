@@ -5,10 +5,10 @@ class GamesController < ApplicationController
   end
 
   def create
-    # For Development Purposes Only - Used to test Available list.
-    Game.create(white_player_id: 1)
+    
+    game = Game.create(white_player_id: current_user.id)
 
-    redirect_to games_path
+    redirect_to game
 
   end
 
@@ -38,7 +38,7 @@ class GamesController < ApplicationController
   private
 
   def game_params
-    params.require(:game).permit(:black_player_id, :white_player_id)
+    params.require(:game).permit(:black_player_id)
   end
 
 
