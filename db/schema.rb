@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170309061830) do
+ActiveRecord::Schema.define(version: 20170314231937) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -22,6 +22,7 @@ ActiveRecord::Schema.define(version: 20170309061830) do
     t.integer  "winner"
     t.datetime "created_at",      null: false
     t.datetime "updated_at",      null: false
+    t.boolean  "is_blacks_move"
     t.index ["winner"], name: "index_games_on_winner", using: :btree
   end
 
@@ -49,14 +50,14 @@ ActiveRecord::Schema.define(version: 20170309061830) do
 
   create_table "pieces", force: :cascade do |t|
     t.string   "type"
-    t.string   "color"
-    t.text     "start_position", default: [],              array: true
     t.integer  "row"
     t.integer  "col"
     t.boolean  "captured"
-    t.datetime "created_at",                  null: false
-    t.datetime "updated_at",                  null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.integer  "game_id"
+    t.boolean  "is_black"
+    t.integer  "user_id"
     t.index ["game_id"], name: "index_pieces_on_game_id", using: :btree
   end
 
