@@ -4,6 +4,7 @@ RSpec.describe User, type: :model do
   context "associations" do
     it { should have_many(:participations) }
     it { should have_many(:games).through(:participations) }
+    it { should have_many(:pieces) }
   end
 
   context "validations" do
