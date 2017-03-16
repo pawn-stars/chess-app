@@ -11,6 +11,9 @@ AllCops:
 Documentation:
   Enabled: false
 
+Metrics/BlockLength:
+  Enabled: false
+
 Metrics/LineLength:
   IgnoreCopDirectives: true
   IgnoredPatterns:
