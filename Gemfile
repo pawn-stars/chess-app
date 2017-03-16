@@ -56,6 +56,8 @@ gem 'bootstrap', '~> 4.0.0.alpha6'
 
 group :development, :test do
   gem 'rspec-rails', '~> 3.5'
+  gem 'shoulda-matchers', '~> 3.1'
 end
 
 gem 'rubocop', '~> 0.47.1', require: false
+gem 'devise'
