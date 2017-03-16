@@ -26,18 +26,21 @@ RSpec.describe Game, type: :model do
   
   describe "Board" do
     before(:all) do
-      if user = User.find_by(email: 'foobar@foobar.com')
-        @user = user
-      else
-        @user = User.create(
-          email: 'foobar@foobar.com',
-          screen_name: 'foobar',
-          password: 'foobar',
-          password_confirmation: 'foobar'
-        )
-      end
+      User.delete_all
+      Game.delete_all
+
+      @user = User.create(
+        email: 'foobar@foobar.com',
+        screen_name: 'foobar',
+        password: 'foobar',
+        password_confirmation: 'foobar'
+      )
       
       @game = @user.games.create(white_player_id: @user);
+    end
+    
+    before(:each) do
+      Piece.delete_all
     end
     
     describe "#grid" do
@@ -49,9 +52,9 @@ RSpec.describe Game, type: :model do
           row: 7, col: 7, is_captured: false, user: @user
         )
         board = Game::Board.new(@game.pieces)
-
-        expect(board.grid[0][0]).to be(piece1)
-        expect(board.grid[7][7]).to be(piece2)
+        
+        expect(board.grid[0][0].id).to eq(piece1.id)
+        expect(board.grid[7][7].id).to eq(piece2.id)
       end
     end
     
