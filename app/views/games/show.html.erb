@@ -4,7 +4,8 @@
   <div class="chessboard">
     <% (0..7).each do |row| %>
       <% (0..7).each do |col| %>
-        <div class="<%= (row + col) % 2 == 0 ? "light" : "dark" %>"></div>
+        <div class="square <%= (row + col) % 2 == 0 ? "light" : "dark" %>"
+          id="<% row.to_s + col.to_s %>"></div>
       <% end %>
     <% end %>
   </div>
