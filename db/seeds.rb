@@ -1,7 +1,66 @@
-# This file should contain all the record creation needed to seed the database with its default values.
-# The data can then be loaded with the rails db:seed command (or created alongside the database with db:setup).
-#
-# Examples:
-#
-#   movies = Movie.create([{ name: 'Star Wars' }, { name: 'Lord of the Rings' }])
-#   Character.create(name: 'Luke', movie: movies.first)
+User.delete_all
+Participation.delete_all
+Game.delete_all
+Piece.delete_all
+Move.delete_all
+
+
+2.times do |n|
+  User.create(
+    email: "foobar-#{n}@foobar.com",
+    password: 'foobar',
+    password_confirmation: 'foobar',
+    screen_name: "foobar#{n}"
+  )
+end
+
+# Proper game creation and joining has not been implemented yet,
+# the code below manually creates the records needed to test the front end
+
+user1 = User.first
+user2 = User.last
+
+game = user1.games.create(white_player_id: user1, black_player_id: user2)
+user2.games << game
+
+user1.pieces.create(
+  type: 'Rook',   row: 0, col: 0, is_black: false, game_id: game)
+user1.pieces.create(
+  type: 'Knight', row: 0, col: 1, is_black: false, game_id: game)
+user1.pieces.create(
+  type: 'Bishop', row: 0, col: 2, is_black: false, game_id: game)
+user1.pieces.create(
+  type: 'Queen',  row: 0, col: 3, is_black: false, game_id: game)
+user1.pieces.create(
+  type: 'King',   row: 0, col: 4, is_black: false, game_id: game)
+user1.pieces.create(
+  type: 'Bishop', row: 0, col: 5, is_black: false, game_id: game)
+user1.pieces.create(
+  type: 'Knight', row: 0, col: 6, is_black: false, game_id: game)
+user1.pieces.create(
+  type: 'Rook',   row: 0, col: 7, is_black: false, game_id: game)
+(0..7).each do |i|
+  user1.pieces.create(
+    type: 'Pawn', row: 1, col: i, is_black: false, game_id: game)
+end
+
+user2.pieces.create(
+  type: 'Rook',   row: 7, col: 0, is_black: true, game_id: game)
+user2.pieces.create(
+  type: 'Knight', row: 7, col: 1, is_black: true, game_id: game)
+user2.pieces.create(
+  type: 'Bishop', row: 7, col: 2, is_black: true, game_id: game)
+user2.pieces.create(
+  type: 'Queen',  row: 7, col: 3, is_black: true, game_id: game)
+user2.pieces.create(
+  type: 'King',   row: 7, col: 4, is_black: true, game_id: game)
+user2.pieces.create(
+  type: 'Bishop', row: 7, col: 5, is_black: true, game_id: game)
+user2.pieces.create(
+  type: 'Knight', row: 7, col: 6, is_black: true, game_id: game)
+user2.pieces.create(
+  type: 'Rook',   row: 7, col: 7, is_black: true, game_id: game)
+(0..7).each do |i|
+  user2.pieces.create(
+    type: 'Pawn', row: 6, col: i, is_black: true, game_id: game)
+end
