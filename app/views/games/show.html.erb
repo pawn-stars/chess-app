@@ -41,9 +41,6 @@
     });
 
 
-
-    $(".piece").draggable({helper: "clone"});
-
     // var pieceToMoveId = null;
     //
     // // select piece to move
@@ -84,8 +81,12 @@
       } else {
         pieceHtml = whitePieceHtml[piece.type];
       }
-      $('.square#'+squareId).html(
-        '<div class="piece" data-id='+ piece.id +'>' + pieceHtml + '</div>' );
+
+      var piece = $.parseHTML(
+        '<div class="piece" data-id='+ piece.id +'>' + pieceHtml + '</div>');
+
+      $('.square#'+squareId).append(piece);
+      $('.piece').draggable();
     }
   });
 </script>
