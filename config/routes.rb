@@ -4,5 +4,5 @@ Rails.application.routes.draw do
 
   root 'games#index'
   resources :games
-  get 'static_pages/index', 'static_pages#index'
+  resources :pieces, only: [:index, :update]
 end

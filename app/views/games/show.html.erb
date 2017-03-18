@@ -2,11 +2,90 @@
 
 <div class="booyah-box col-xs-10 col-xs-offset-1">
   <div class="chessboard">
-    <% (0..7).each do |row| %>
+    <% (7.downto(0)).each do |row| %>
       <% (0..7).each do |col| %>
         <div class="square <%= (row + col) % 2 == 0 ? "light" : "dark" %>"
-          id="<% row.to_s + col.to_s %>"></div>
+          id="<%= row.to_s + col.to_s %>"></div>
       <% end %>
     <% end %>
   </div>
 </div>
+
+<script>
+  var whitePieceHtml = {
+    King: '&#9812;',
+    Queen: '&#9813;',
+    Rook: '&#9814;',
+    Bishop: '&#9815;',
+    Knight: '&#9816;',
+    Pawn: '&#9817;'
+  };
+  var blackPieceHtml = {
+    King: '&#9818;',
+    Queen: '&#9819;',
+    Rook: '&#9820;',
+    Bishop: '&#9821;',
+    Knight: '&#9822;',
+    Pawn: '&#9823;'
+  };
+
+  $(function() {
+
+    // populates the board with pieces
+    $.get("/pieces").success(function(pieces) {
+      pieces.forEach(function(piece, i){
+        if (!piece.is_captured) {
+          placePiece(piece);
+        }
+      });
+    });
+
+
+
+    $(".piece").draggable({helper: "clone"});
+
+    // var pieceToMoveId = null;
+    //
+    // // select piece to move
+    // $('.square').on("click", ".piece", function() {
+    //   if (pieceToMoveId === null) {
+    //     $('.piece').css("background-color", "transparent")
+    //     $(this).css("background-color", "red");
+    //     setTimeout(function() { pieceToMoveId = $(this).data("id"); console.log(pieceToMoveId)}, 1);
+    //   }
+    // });
+    //
+    // // move the piece
+    // $('.square').click(function(){
+    //   if (pieceToMoveId) {
+    //     var coord = $('[data-id=' + pieceToMoveId + ']')
+    //       .parent('.square').attr('id'); console.log(coord);
+    //     var oldRow = coord[0];
+    //     var oldCol = coord[1];
+    //     coord = $(this).attr('id');
+    //     var newRow = coord[0];
+    //     var newCol = coord[1];
+    //
+    //     $.post("/pieces/" + pieceToMoveId, {
+    //       _method: "PUT",
+    //       task: { row: newRow, col: newCol}
+    //     }).success(function(piece){
+    //
+    //       placePiece(piece);
+    //     });
+    //   }
+    // });
+
+    function placePiece(piece) {
+      var squareId = String(piece.row) + String(piece.col);
+      var pieceHtml = "";
+      if (piece.is_black) {
+        pieceHtml = blackPieceHtml[piece.type];
+      } else {
+        pieceHtml = whitePieceHtml[piece.type];
+      }
+      $('.square#'+squareId).html(
+        '<div class="piece" data-id='+ piece.id +'>' + pieceHtml + '</div>' );
+    }
+  });
+</script>

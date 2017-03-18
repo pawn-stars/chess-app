@@ -24,43 +24,43 @@ game = user1.games.create(white_player_id: user1, black_player_id: user2)
 user2.games << game
 
 user1.pieces.create(
-  type: 'Rook',   row: 0, col: 0, is_black: false, game_id: game)
+  type: 'Rook',   row: 0, col: 0, is_black: false, game_id: game.id)
 user1.pieces.create(
-  type: 'Knight', row: 0, col: 1, is_black: false, game_id: game)
+  type: 'Knight', row: 0, col: 1, is_black: false, game_id: game.id)
 user1.pieces.create(
-  type: 'Bishop', row: 0, col: 2, is_black: false, game_id: game)
+  type: 'Bishop', row: 0, col: 2, is_black: false, game_id: game.id)
 user1.pieces.create(
-  type: 'Queen',  row: 0, col: 3, is_black: false, game_id: game)
+  type: 'Queen',  row: 0, col: 3, is_black: false, game_id: game.id)
 user1.pieces.create(
-  type: 'King',   row: 0, col: 4, is_black: false, game_id: game)
+  type: 'King',   row: 0, col: 4, is_black: false, game_id: game.id)
 user1.pieces.create(
-  type: 'Bishop', row: 0, col: 5, is_black: false, game_id: game)
+  type: 'Bishop', row: 0, col: 5, is_black: false, game_id: game.id)
 user1.pieces.create(
-  type: 'Knight', row: 0, col: 6, is_black: false, game_id: game)
+  type: 'Knight', row: 0, col: 6, is_black: false, game_id: game.id)
 user1.pieces.create(
-  type: 'Rook',   row: 0, col: 7, is_black: false, game_id: game)
+  type: 'Rook',   row: 0, col: 7, is_black: false, game_id: game.id)
 (0..7).each do |i|
   user1.pieces.create(
-    type: 'Pawn', row: 1, col: i, is_black: false, game_id: game)
+    type: 'Pawn', row: 1, col: i, is_black: false, game_id: game.id)
 end
 
 user2.pieces.create(
-  type: 'Rook',   row: 7, col: 0, is_black: true, game_id: game)
+  type: 'Rook',   row: 7, col: 0, is_black: true, game_id: game.id)
 user2.pieces.create(
-  type: 'Knight', row: 7, col: 1, is_black: true, game_id: game)
+  type: 'Knight', row: 7, col: 1, is_black: true, game_id: game.id)
 user2.pieces.create(
-  type: 'Bishop', row: 7, col: 2, is_black: true, game_id: game)
+  type: 'Bishop', row: 7, col: 2, is_black: true, game_id: game.id)
 user2.pieces.create(
-  type: 'Queen',  row: 7, col: 3, is_black: true, game_id: game)
+  type: 'Queen',  row: 7, col: 3, is_black: true, game_id: game.id)
 user2.pieces.create(
-  type: 'King',   row: 7, col: 4, is_black: true, game_id: game)
+  type: 'King',   row: 7, col: 4, is_black: true, game_id: game.id)
 user2.pieces.create(
-  type: 'Bishop', row: 7, col: 5, is_black: true, game_id: game)
+  type: 'Bishop', row: 7, col: 5, is_black: true, game_id: game.id)
 user2.pieces.create(
-  type: 'Knight', row: 7, col: 6, is_black: true, game_id: game)
+  type: 'Knight', row: 7, col: 6, is_black: true, game_id: game.id)
 user2.pieces.create(
-  type: 'Rook',   row: 7, col: 7, is_black: true, game_id: game)
+  type: 'Rook',   row: 7, col: 7, is_black: true, game_id: game.id)
 (0..7).each do |i|
   user2.pieces.create(
-    type: 'Pawn', row: 6, col: i, is_black: true, game_id: game)
+    type: 'Pawn', row: 6, col: i, is_black: true, game_id: game.id)
 end

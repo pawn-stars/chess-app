@@ -61,3 +61,4 @@ end
 
 gem 'rubocop', '~> 0.47.1', require: false
 gem 'devise'
+gem 'jquery-ui-rails'

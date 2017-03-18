@@ -25,7 +25,7 @@ body {
 .navbar-inverse .navbar-brand {
   color: #E3E85A;
   font-family: 'chunkfiveroman', sans-serif;
-  font-size: 26px;  
+  font-size: 26px;
 }
 
 .chessboard {
@@ -46,4 +46,11 @@ body {
   width: 100px;
   height: 100px;
   background-color: #F7DCB4;
+}
+
+.piece {
+  font-size: 64px;
+  text-align: center;
+  user-select: none;
+  cursor: grab;
 }
