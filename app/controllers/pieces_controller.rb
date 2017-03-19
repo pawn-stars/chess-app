@@ -1,6 +1,6 @@
 class PiecesController < ApplicationController
   def index
-    game_id = request.referrer.last.to_i
+    game_id = params[:game_id]
     render json: Game.find(game_id).pieces
   end
 
