@@ -40,38 +40,15 @@
       });
     });
 
-
-    // var pieceToMoveId = null;
-    //
-    // // select piece to move
-    // $('.square').on("click", ".piece", function() {
-    //   if (pieceToMoveId === null) {
-    //     $('.piece').css("background-color", "transparent")
-    //     $(this).css("background-color", "red");
-    //     setTimeout(function() { pieceToMoveId = $(this).data("id"); console.log(pieceToMoveId)}, 1);
-    //   }
-    // });
-    //
-    // // move the piece
-    // $('.square').click(function(){
-    //   if (pieceToMoveId) {
-    //     var coord = $('[data-id=' + pieceToMoveId + ']')
-    //       .parent('.square').attr('id'); console.log(coord);
-    //     var oldRow = coord[0];
-    //     var oldCol = coord[1];
-    //     coord = $(this).attr('id');
-    //     var newRow = coord[0];
-    //     var newCol = coord[1];
-    //
-    //     $.post("/pieces/" + pieceToMoveId, {
-    //       _method: "PUT",
-    //       task: { row: newRow, col: newCol}
-    //     }).success(function(piece){
-    //
-    //       placePiece(piece);
-    //     });
-    //   }
-    // });
+    $(".square").droppable({
+      // if (moveIsInvalid) $( "#draggable" ).draggable({ revert: "valid" });
+      drop: function(event, ui) {
+        var piece = $(ui.draggable);
+        $(this).append(piece);
+        piece.css({left: 0, top: 0});
+        movePiece(piece);
+      }
+    });
 
     function placePiece(piece) {
       var squareId = String(piece.row) + String(piece.col);
@@ -86,7 +63,19 @@
         '<div class="piece" data-id='+ piece.id +'>' + pieceHtml + '</div>');
 
       $('.square#'+squareId).append(piece);
-      $('.piece').draggable();
+      $('.piece').draggable ();
+    }
+
+    function movePiece(piece) {
+      var pieceId = piece.data("id");
+      var coord = piece.closest('.square').attr('id');
+      var newRow = coord[0];
+      var newCol = coord[1];
+
+      $.post("/pieces/" + piece.data("id"), {
+        _method: "PUT",
+        piece: { row: newRow, col: newCol }
+      }).success();
     }
   });
 </script>
