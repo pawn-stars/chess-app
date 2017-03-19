@@ -11,7 +11,7 @@ class Piece < ApplicationRecord
   end
 
   # Adds an STI type property to the JSON data, rails doesn't do this be default
-  def serializable_hash(options=nil)
+  def serializable_hash(options = nil)
     super.merge("type" => type)
   end
 
