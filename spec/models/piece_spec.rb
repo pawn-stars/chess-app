@@ -11,6 +11,7 @@ RSpec.describe Piece, type: :model do
     before(:all) do
       User.delete_all
       Game.delete_all
+      Move.delete_all
 
       @user = User.create(
         email: 'foobar@foobar.com',
@@ -34,6 +35,19 @@ RSpec.describe Piece, type: :model do
 
       expect(piece.row).to eq(7)
       expect(piece.col).to eq(7)
+    end
+
+    it "should create a new move" do
+      piece = @game.pieces.create(
+        row: 0, col: 0, is_captured: false, user: @user
+      )
+      piece.move_to!(7, 7)
+      move = piece.moves.last
+
+      expect(move.move_number).to eq(1)
+      expect(move.from_position).to eq([0, 0])
+      expect(move.to_position).to eq([7, 7])
+      expect(move.game_id).to eq(@game.id)
     end
 
     it "should raise an error if the arguments are out of bounds" do

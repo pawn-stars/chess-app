@@ -1,6 +1,7 @@
 class Game < ApplicationRecord
   has_many :participations
   has_many :pieces
+  has_many :moves
 
   scope :available,
         lambda {
