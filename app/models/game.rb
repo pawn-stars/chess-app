@@ -39,16 +39,17 @@ class Game < ApplicationRecord
 
   def populate_board
     # White pieces
-    Rook.create(game_id: id, row: 0, col: 0, is_black: false)
-    Knight.create(game_id: id, row: 0, col: 1, is_black: false)
-    Bishop.create(game_id: id, row: 0, col: 2, is_black: false)
-    Queen.create(game_id: id, row: 0, col: 3, is_black: false)
-    King.create(game_id: id, row: 0, col: 4, is_black: false)
-    Bishop.create(game_id: id, row: 0, col: 5, is_black: false)
-    Knight.create(game_id: id, row: 0, col: 6, is_black: false)
-    Rook.create(game_id: id, row: 0, col: 7, is_black: false)
+    Rook.create(game_id: id, user_id: white_player_id, row: 0, col: 0, is_black: false)
+    Knight.create(game_id: id, user_: white_player_id, row: 0, col: 1, is_black: false)
+    Bishop.create(game_id: id, user_id: white_player_id, row: 0, col: 2, is_black: false)
+    Queen.create(game_id: id, user_id: white_player_id, row: 0, col: 3, is_black: false)
+    King.create(game_id: id, user_id: white_player_id, row: 0, col: 4, is_black: false)
+    Bishop.create(game_id: id, user_id: white_player_id, row: 0, col: 5, is_black: false)
+    Knight.create(game_id: id, user_id: white_player_id, row: 0, col: 6, is_black: false)
+    Rook.create(game_id: id, user_id: white_player_id, row: 0, col: 7, is_black: false)
     (0..7).each do |i|
       Pawn.create(game_id: id,
+                  user_id: white_player_id,
                   row: 1,
                   col: i,
                   is_black: false)
@@ -57,17 +58,18 @@ class Game < ApplicationRecord
     # Black pieces
     (0..7).each do |i|
       Pawn.create(game_id: id,
+                  user_id: black_player_id,
                   row: 6,
                   col: i,
                   is_black: true)
     end
-    Rook.create(game_id: id, row: 7, col: 0, is_black: true)
-    Knight.create(game_id: id, row: 7, col: 1, is_black: true)
-    Bishop.create(game_id: id, row: 7, col: 2, is_black: true)
-    Queen.create(game_id: id, row: 7, col: 3, is_black: true)
-    King.create(game_id: id, row: 7, col: 4, is_black: true)
-    Bishop.create(game_id: id, row: 7, col: 5, is_black: true)
-    Knight.create(game_id: id, row: 7, col: 6, is_black: true)
-    Rook.create(game_id: id, row: 7, col: 7, is_black: true)
+    Rook.create(game_id: id, user_id: black_player_id, row: 7, col: 0, is_black: true)
+    Knight.create(game_id: id, user_id: black_player_id, row: 7, col: 1, is_black: true)
+    Bishop.create(game_id: id, user_id: black_player_id, row: 7, col: 2, is_black: true)
+    Queen.create(game_id: id, user_id: black_player_id, row: 7, col: 3, is_black: true)
+    King.create(game_id: id, user_id: black_player_id, row: 7, col: 4, is_black: true)
+    Bishop.create(game_id: id, user_id: black_player_id, row: 7, col: 5, is_black: true)
+    Knight.create(game_id: id, user_id: black_player_id, row: 7, col: 6, is_black: true)
+    Rook.create(game_id: id, user_id: black_player_id, row: 7, col: 7, is_black: true)
   end
 end
