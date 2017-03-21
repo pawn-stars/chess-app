@@ -25,7 +25,7 @@ class GamesController < ApplicationController
 
     @game.update_attributes(game_params)
     if @game.valid?
-      redirect_to games_path
+      redirect_to game_path(@game)
     else
       render :index, text: "Not Allowed"
     end
