@@ -1,3 +1,5 @@
+<%= link_to "Sample Game (development)", game_path(Game.first) %>
+
 <% current_user = User.first %>
 
 <%= button_to "Start a New Game", games_path, class: "btn btn-success" %>

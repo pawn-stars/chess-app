@@ -54,6 +54,12 @@ body {
   background-color: #F7DCB4;
 }
 
+.piece {
+  font-size: 64px;
+  text-align: center;
+  user-select: none;
+  cursor: grab;
+
 .welcome {
   color: white;
   float: right;
