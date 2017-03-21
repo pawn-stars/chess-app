@@ -19,4 +19,19 @@ class Piece < ApplicationRecord
     raise "Out of bounds" if row < 0 || row > 7 || col < 0 || col > 7
     update(row: row, col: col)
   end
+
+  def capture_piece(row, col)
+    other_piece = game.piece_at(row, col)
+    return true if game.path_obstructed? && other_piece.user != user
+    game.piece_at(row, col).captured!
+  end
+
+  # This updates a piece to captured
+  def captured!
+    update(captured: true)
+  end
+
+  def captured?
+    captured == true
+  end
 end
