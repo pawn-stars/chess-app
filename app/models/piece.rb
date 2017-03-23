@@ -15,7 +15,7 @@ class Piece < ApplicationRecord
     super.merge("type" => type)
   end
 
-  def move_to!(row, col)
+  def move_to!(to_row, to_col)
     Rails.logger.debug "Model move_to. from location: #{self.row},#{self.col} to location: #{to_row},#{to_col}"
 
     if valid_move?(to_row,to_col)
