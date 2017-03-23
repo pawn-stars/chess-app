@@ -6,7 +6,14 @@ class PiecesController < ApplicationController
 
   def update
     piece = Piece.find(params[:id])
-    piece.update_attributes(piece_params)
+    Rails.logger.debug "PIECE Controller Update. call move_to"
+
+    if piece.move_to!(piece_params[:row].to_i, piece_params[:col].to_i)
+      Rails.logger.debug "VALID MOVE. Update Record - "SQL update in server window"
+      piece.update_attributes(piece_params)  # this is the line that calls the jQuery $.post
+    else
+      Rails.logger.debug "INVALID MOVE. "Do not update record. Piece will pop back on game page refresh"
+    end
     render json: piece
   end
 
