@@ -23,6 +23,7 @@ class Piece < ApplicationRecord
       from_col = self.col   # needed for create_move if valid_move? true
       Rails.logger.debug "valid_move result TRUE. Piece stays at new location. controller update UPDATES table."
       update_attributes(row: to_row, col: to_col)
+      # create_move(from_row,to_row)
     else
       Rails.logger.debug "valid move result FALSE. Piece should pop back to original location. controller update does NOT update database table."
     end   # method move_to!
