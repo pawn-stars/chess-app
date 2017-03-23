@@ -19,15 +19,12 @@ class Piece < ApplicationRecord
     Rails.logger.debug "Model move_to. from location: #{self.row},#{self.col} to location: #{to_row},#{to_col}"
 
     if valid_move?(to_row,to_col)
+      from_row = self.row   # needed for create_move if valid_move? true
+      from_col = self.col   # needed for create_move if valid_move? true
       Rails.logger.debug "valid_move result TRUE. Piece stays at new location. controller update UPDATES table."
-      # use update_attributes in controller update method instead update(row: to_row, col: to_col)
-      self.row = to_row
-      self.col = to_col
-      return true
-
+      update_attributes(row: to_row, col: to_col)
     else
-      Rails.logger.debug "valid move result FALSE. Piece should pop back to original location. controller update does NOT update table."
-      return false
+      Rails.logger.debug "valid move result FALSE. Piece should pop back to original location. controller update does NOT update database table."
     end   # method move_to!
 
     # origin code
@@ -57,7 +54,11 @@ class Piece < ApplicationRecord
     # fail NotImplementedError 'Piece sub-class must implement #legal_move?'
     # Will remove comment and following code once all sub-classes are complete.
 
-    self.row == to_row || self.col == to_col || (self.row-to_row).abs == (self.col-to_col).abs
+    if (self.type == "Knight")
+      return true
+    else
+      self.row == to_row || self.col == to_col || (self.row-to_row).abs == (self.col-to_col).abs
+    end
 
   end   # method move_legal
 
