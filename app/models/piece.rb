@@ -42,11 +42,12 @@ class Piece < ApplicationRecord
   end   # method valid_move?
 
   def move_nil?(to_row, to_col)
+    Rails.logger.debug "NIL MOVE"
     row == to_row && col == to_col
   end   # method move_nil?
 
   def move_out_of_bounds?(to_row, to_col)
-    to_row < 0 || to_row > 7 || to_col < 0 || to_row > 7
+    to_row < 0 || to_row > 7 || to_col < 0 || to_col > 7
   end   # method move_out_of_bounds?
 
   def move_legal?(to_row, to_col)
