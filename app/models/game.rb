@@ -1,3 +1,7 @@
+# rubocop:disable Metrics/AbcSize
+# rubocop:disable Metrics/MethodLength
+# rubocop:disable LineLength
+
 class Game < ApplicationRecord
   has_many :participations
   has_many :pieces
