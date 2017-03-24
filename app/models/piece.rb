@@ -19,6 +19,7 @@ class Piece < ApplicationRecord
 
   def move_to!(row, col)
     raise "Out of bounds" if row < 0 || row > 7 || col < 0 || col > 7
+    create_move!(row, col)
     update(row: row, col: col)
   end
 
@@ -38,7 +39,7 @@ class Piece < ApplicationRecord
     is_captured == true
   end
 
-private
+  private
 
   def create_move!(new_row, new_col)
     last_move_number = game.moves.last ? game.moves.last.move_number : 0

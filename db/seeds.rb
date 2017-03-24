@@ -20,7 +20,7 @@ end
 user1 = User.first
 user2 = User.last
 
-game = user1.games.create(white_player_id: user1, black_player_id: user2)
+game = user1.games.create(white_player_id: user1.id, black_player_id: user2.id)
 user2.games << game
 
 user1.pieces.create(
