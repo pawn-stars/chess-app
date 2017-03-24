@@ -6,6 +6,14 @@ class Piece < ApplicationRecord
   scope :are_captured, -> { where(is_captured: true) }
   scope :are_not_captured, -> { where(is_captured: false) }
 
+  def white?
+    self.user == self.game.white_player
+  end
+
+  def black?
+    self.user == self.game.black_player
+  end
+
   def self.types
     %w(Pawn Rook Knight Bishop Queen King)
   end
