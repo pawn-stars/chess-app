@@ -79,6 +79,7 @@ RSpec.describe Piece, type: :model do
       piece = @game.pieces.create(
         row: from_row, col: from_col, is_captured: false, user: @user
       )
+      # rubocop: disable LineLength
       expect(piece.send(:move_out_of_bounds?, from_row + 1, from_col + 1)).to be false
     end
 
