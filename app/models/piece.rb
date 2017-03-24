@@ -16,59 +16,67 @@ class Piece < ApplicationRecord
   end
 
   def move_to!(to_row, to_col)
-    Rails.logger.debug "Model move_to. from location: #{self.row},#{self.col} to location: #{to_row},#{to_col}"
+    # rubocop: disable LineLength
+    Rails.logger.debug "Model move_to. from: #{row},#{col} to: #{to_row},#{to_col}"
 
-    if valid_move?(to_row,to_col)
-      from_row = self.row   # needed for create_move if valid_move? true
-      from_col = self.col   # needed for create_move if valid_move? true
-      Rails.logger.debug "valid_move result TRUE. Piece stays at new location. controller update UPDATES table."
+    if valid_move?(to_row, to_col)
+      from_row = row   # needed for create_move if valid_move? true
+      from_col = col   # needed for create_move if valid_move? true
+      Rails.logger.debug "valid_move result TRUE. Piece stays at new location."
       update_attributes(row: to_row, col: to_col)
-      # create_move(from_row,to_row)
+      create_move!(from_row, from_col)
     else
-      Rails.logger.debug "valid move result FALSE. Piece should pop back to original location. controller update does NOT update database table."
-    end   # method move_to!
+      Rails.logger.debug "valid move result FALSE. Piece pop back when games show page reloaded."
+    end # method move_to!
+  end   # method move_to!
 
-    # origin code
-    # raise "Out of bounds" if row < 0 || row > 7 || col < 0 || col > 7
-    # update(row: row, col: col)
-  end
+  private
 
-  def valid_move?(to_row,to_col)
-    return false if move_nil?(to_row,to_col)
-    return false if move_out_of_bounds?(to_row,to_col)
-    return false unless move_legal?(to_row,to_col)
-    return false if move_obstructed?(to_row,to_col)
-    return false if move_destination_obstructed(to_row,to_col)
-    return true
+  def valid_move?(to_row, to_col)
+    return false if move_nil?(to_row, to_col)
+    return false if move_out_of_bounds?(to_row, to_col)
+    return false unless move_legal?(to_row, to_col)
+    return false if move_obstructed?(to_row, to_col)
+    return false if move_destination_obstructed(to_row, to_col)
+    true
   end   # method valid_move?
 
   def move_nil?(to_row, to_col)
-    self.row == to_row && self.col == to_col
+    row == to_row && col == to_col
   end   # method move_nil?
 
-  def move_out_of_bounds?(to_row,to_col)
+  def move_out_of_bounds?(to_row, to_col)
     to_row < 0 || to_row > 7 || to_col < 0 || to_row > 7
   end   # method move_out_of_bounds?
 
-  def move_legal?(to_row,to_col)
+  def move_legal?(to_row, to_col)
     # Piece sub-classes MUST implement move_legal? method. See King.rb for example
     # fail NotImplementedError 'Piece sub-class must implement #legal_move?'
     # Will remove comment and following code once all sub-classes are complete.
 
-    if (self.type == "Knight")
-      return true
+    if type == "Knight"
+      true
     else
-      self.row == to_row || self.col == to_col || (self.row-to_row).abs == (self.col-to_col).abs
+      row == to_row || col == to_col || (row - to_row).abs == (col - to_col).abs
     end
-
   end   # method move_legal
 
-  def move_obstructed?(to_row,to_col)
-    return false
+  def move_obstructed?(_to_row, _to_col)
+    false
   end   # move_obstructed
 
-  def move_destination_obstructed(to_row,to_col)
-    return false
-  end   # move_destination_obstructed
+  def move_destination_obstructed(_to_row, _to_col)
+    false
+  end # method move_destination_obstructed
 
+  def create_move!(from_row, from_col)
+    last_move_number = game.moves.last ? game.moves.last.move_number : 0
+    moves.create(
+      move_number: last_move_number + 1,
+      from_position: [from_row, from_col],
+      to_position: [row, col],
+      move_type: nil, # to be implemented later
+      game_id: game.id
+    )
+  end # method create_move!
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170315010400) do
+ActiveRecord::Schema.define(version: 20170321224803) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -28,13 +28,13 @@ ActiveRecord::Schema.define(version: 20170315010400) do
 
   create_table "moves", force: :cascade do |t|
     t.integer  "move_number"
-    t.text     "from_position", default: [],              array: true
-    t.text     "to_position",   default: [],              array: true
     t.string   "move_type"
     t.integer  "game_id"
     t.integer  "piece_id"
     t.datetime "created_at",                 null: false
     t.datetime "updated_at",                 null: false
+    t.integer  "from_position", default: [],              array: true
+    t.integer  "to_position",   default: [],              array: true
     t.index ["game_id"], name: "index_moves_on_game_id", using: :btree
     t.index ["piece_id"], name: "index_moves_on_piece_id", using: :btree
   end
