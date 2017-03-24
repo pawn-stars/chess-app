@@ -25,3 +25,6 @@ Style/EmptyMethod:
 
 Style/StringLiterals:
   Enabled: false
+
+Metrics/LineLength:
+  Max: 100
