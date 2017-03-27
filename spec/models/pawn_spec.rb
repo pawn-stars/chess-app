@@ -107,7 +107,7 @@ RSpec.describe Pawn, type: :model do
       before(:example) do
         Piece.delete_all
         @pawn = @game.pieces.create(
-          row: 6, col: 1, type: Pawn, is_black: true, user: @white
+          row: 6, col: 1, type: Pawn, is_black: true, user: @black
         )
       end
 
@@ -131,7 +131,7 @@ RSpec.describe Pawn, type: :model do
       end
 
       it 'allows right-side capture moves' do
-        @game.pieces.create(row: 5, col: 2, is_black: true, user: @black)
+        @game.pieces.create(row: 5, col: 2, is_black: false, user: @white)
 
         to_row = @pawn.row + forward_one
         to_col = @pawn.col + 1
@@ -142,7 +142,7 @@ RSpec.describe Pawn, type: :model do
       end
 
       it 'allows left-side capture moves' do
-        @game.pieces.create(row: 5, col: 0, is_black: false, user: @black)
+        @game.pieces.create(row: 5, col: 0, is_black: false, user: @white)
 
         to_row = @pawn.row + forward_one
         to_col = @pawn.col - 1
@@ -154,7 +154,7 @@ RSpec.describe Pawn, type: :model do
 
       it 'allows right-side en passant' do
         @pawn.move_to!(4, @pawn.col)
-        @game.pieces.create(row: 4, col: @pawn.col + 1, is_black: false, user: @black)
+        @game.pieces.create(row: 4, col: @pawn.col + 1, is_black: false, user: @white)
 
         to_row = @pawn.row + forward_one
         to_col = @pawn.col + 1
@@ -166,7 +166,7 @@ RSpec.describe Pawn, type: :model do
 
       it 'allows left-side en passant' do
         @pawn.move_to!(4, @pawn.col)
-        @game.pieces.create(row: 4, col: @pawn.col - 1, is_black: true, user: @black)
+        @game.pieces.create(row: 4, col: @pawn.col - 1, is_black: false, user: @white)
 
         to_row = @pawn.row + forward_one
         to_col = @pawn.col - 1
