@@ -1,5 +1,3 @@
-# rubocop:disable LineLength
-
 class Piece < ApplicationRecord
   belongs_to :user
   belongs_to :game
@@ -17,10 +15,13 @@ class Piece < ApplicationRecord
     super.merge("type" => type)
   end
 
-  def move_to!(row, col)
-    raise "Out of bounds" if row < 0 || row > 7 || col < 0 || col > 7
-    create_move!(row, col)
-    update(row: row, col: col)
+  def move_to!(to_row, to_col)
+    return unless valid_move?(to_row, to_col)
+
+    from_row = row
+    from_col = col
+    update_attributes(row: to_row, col: to_col)
+    create_move!(from_row, from_col)
   end
 
   def capture_piece(row, col)
@@ -41,12 +42,49 @@ class Piece < ApplicationRecord
 
   private
 
-  def create_move!(new_row, new_col)
+  def valid_move?(to_row, to_col)
+    return false if move_nil?(to_row, to_col)
+    return false if move_out_of_bounds?(to_row, to_col)
+    return false unless move_legal?(to_row, to_col)
+    return false if move_destination_obstructed?(to_row, to_col)
+    return false if move_obstructed?(to_row, to_col)
+    true
+  end
+
+  def move_nil?(to_row, to_col)
+    row == to_row && col == to_col
+  end
+
+  def move_out_of_bounds?(to_row, to_col)
+    to_row < 0 || to_row > 7 || to_col < 0 || to_col > 7
+  end
+
+  def move_legal?(to_row, to_col)
+    # Piece sub-classes MUST implement move_legal? method. See King.rb for example
+    # fail NotImplementedError 'Piece sub-class must implement #legal_move?'
+    # Will remove comment and following code once all sub-classes are complete.
+
+    if type == "Knight"
+      true
+    else
+      row == to_row || col == to_col || (row - to_row).abs == (col - to_col).abs
+    end
+  end
+
+  def move_destination_obstructed?(_to_row, _to_col)
+    false
+  end
+
+  def move_obstructed?(_to_row, _to_col)
+    false
+  end
+
+  def create_move!(from_row, from_col)
     last_move_number = game.moves.last ? game.moves.last.move_number : 0
     moves.create(
       move_number: last_move_number + 1,
-      from_position: [row, col],
-      to_position: [new_row, new_col],
+      from_position: [from_row, from_col],
+      to_position: [row, col],
       move_type: nil, # to be implemented later
       game_id: game.id
     )

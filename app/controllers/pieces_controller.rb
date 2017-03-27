@@ -6,7 +6,9 @@ class PiecesController < ApplicationController
 
   def update
     piece = Piece.find(params[:id])
-    piece.update_attributes(piece_params)
+
+    piece.move_to!(piece_params[:row].to_i, piece_params[:col].to_i)
+
     render json: piece
   end
 
