@@ -58,4 +58,56 @@ RSpec.describe Piece, type: :model do
       expect { piece.move_to!(8, 0) }.to raise_error(RuntimeError)
     end
   end
+
+  describe "#capture" do
+    before(:all) do
+      User.delete_all
+      Game.delete_all
+      Piece.delete_all
+
+      @user1 = User.create(
+        email: 'foobar@foobar.com',
+        screen_name: 'foobar',
+        password: 'foobar',
+        password_confirmation: 'foobar'
+      )
+      @user2 = User.create(
+        email: 'black@foobar.com',
+        screen_name: 'black',
+        password: 'foobar',
+        password_confirmation: 'foobar'
+      )
+
+      @game = @user1.games.create(
+        white_player_id: @user1,
+        black_player_id: @user2
+      )
+    end
+
+    it "should capture a piece" do
+      piece1 = @user1.pieces.create(row: 0, col: 0, game_id: @game.id)
+      piece2 = @user2.pieces.create(
+        row: 0,
+        col: 1,
+        is_captured: false,
+        game_id: @game.id
+      )
+      expect(piece1.capture_piece(0, 1)).to eq(true)
+      piece2.reload
+      expect(piece2.captured?).to eq(true)
+    end
+
+    it "should not capture a player's own piece" do
+      piece1 = @user1.pieces.create(row: 0, col: 0, game_id: @game.id)
+      piece2 = @user1.pieces.create(
+        row: 0,
+        col: 1,
+        is_captured: false,
+        game_id: @game.id
+      )
+      expect { piece1.capture_piece(0, 1) }.to raise_error(RuntimeError)
+      piece2.reload # fetch it from the DB again
+      expect(piece2.captured?).to eq(false)
+    end
+  end
 end

@@ -1,3 +1,5 @@
+# rubocop:disable LineLength
+
 class Piece < ApplicationRecord
   belongs_to :user
   belongs_to :game
@@ -19,6 +21,22 @@ class Piece < ApplicationRecord
     raise "Out of bounds" if row < 0 || row > 7 || col < 0 || col > 7
     create_move!(row, col)
     update(row: row, col: col)
+  end
+
+  def capture_piece(row, col)
+    other_piece = game.piece_at(row, col)
+    raise 'You cannot capture your own piece' if other_piece && other_piece.user == user
+    other_piece.captured!
+    return true if other_piece && other_piece.user != user
+  end
+
+  # This updates a piece to captured
+  def captured!
+    update(is_captured: true)
+  end
+
+  def captured?
+    is_captured == true
   end
 
   private
