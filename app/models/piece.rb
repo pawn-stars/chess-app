@@ -16,29 +16,15 @@ class Piece < ApplicationRecord
   end
 
   def move_to!(to_row, to_col)
-    return unless valid_move?(to_row, to_col)
+    return false unless valid_move?(to_row, to_col)
 
     from_row = row
     from_col = col
     update_attributes(row: to_row, col: to_col)
-    create_move!(from_row, from_col)
+    # create_move!(from_row, from_col)
   end
 
-  def capture_piece(row, col)
-    other_piece = game.piece_at(row, col)
-    raise 'You cannot capture your own piece' if other_piece && other_piece.user == user
-    other_piece.captured!
-    return true if other_piece && other_piece.user != user
-  end
 
-  # This updates a piece to captured
-  def captured!
-    update(is_captured: true)
-  end
-
-  def captured?
-    is_captured == true
-  end
 
   private
 
@@ -46,8 +32,9 @@ class Piece < ApplicationRecord
     return false if move_nil?(to_row, to_col)
     return false if move_out_of_bounds?(to_row, to_col)
     return false unless move_legal?(to_row, to_col)
-    return false if move_destination_obstructed?(to_row, to_col)
     return false if move_obstructed?(to_row, to_col)
+    return false if move_destination_obstructed?(to_row, to_col)
+
     true
   end
 
@@ -71,13 +58,100 @@ class Piece < ApplicationRecord
     end
   end
 
-  def move_destination_obstructed?(_to_row, _to_col)
+  def move_obstructed?(to_row, to_col)
+    Rails.logger.debug "***** Move_obstructed from #{row},#{col} to #{to_row},#{to_col}"
+    if type == "Knight"
+      Rails.logger.debug "KNIGHT. cannot obstruct move"
+      false
+    end
+
+    obstruction_array = []
+    col_direction = 0
+    row_direction = 0
+
+    if row == to_row
+      col_direction = to_col > col ? 1 : -1
+      current_col = col + col_direction
+      while (to_col - current_col).abs > 0
+        obstruction_array << [row,current_col]
+        current_col += col_direction
+      end
+      Rails.logger.debug "Horizonal Move. Inspect #{obstruction_array.size} squares"
+    elsif col == to_col
+      row_direction = to_row > row ? 1 : -1
+      current_row = row + row_direction
+      while (to_row - current_row).abs > 0
+        obstruction_array << [current_row,col]
+        current_row += row_direction
+      end
+      Rails.logger.debug "Vertical Move. Inspect #{obstruction_array.size} squares"
+    elsif (row - to_row).abs == (col - to_col).abs
+      col_direction = to_col > col ? 1 : -1
+      row_direction = to_row > row ? 1 : -1
+      current_col = col + col_direction
+      current_row = row + row_direction
+      while (to_row - current_row).abs > 0 && (to_col - current_col).abs > 0
+        obstruction_array << [current_row,current_col]
+        current_col += col_direction
+        current_row += row_direction
+      end
+      Rails.logger.debug "Diagonal Move. Inspect #{obstruction_array.size} squares"
+    end
+
+    Rails.logger.debug ""
+    Rails.logger.debug "Iterate obstruction_array"
+
+    return false if obstruction_array.empty?
+    obstruction_array.each do |square|
+      if game.piece_at(square[0],square[1])
+        Rails.logger.debug "Obstructed Square at #{square[0]}, #{square[1]}"
+      end
+      return true if game.piece_at(square[0],square[1])
+    end
+    Rails.logger.debug "NO OBSTRUCTION"
     false
   end
 
-  def move_obstructed?(_to_row, _to_col)
-    false
+  def move_destination_obstructed?(to_row, to_col)
+    other_piece = game.piece_at(to_row, to_col)
+    if other_piece
+      side = "White"
+      if other_piece.is_black
+        side = "Black"
+      end
+      Rails.logger.debug "Destination NOT CLEAR. There is a #{other_piece.type} for side #{side} at destination."
+      if other_piece.user == user
+        Rails.logger.debug "DESTINATION CONTAINS SAME SIDE PIECE. ERROR"
+        true
+      else
+        Rails.logger.debug "Destination contains opponent piece. capture possible."
+        false
+      end
+    else
+      Rails.logger.debug "Destination EMPTY. return false."
+      false
+    end
   end
+
+
+
+  # moved capture piece methods to private - after verify that move to new square is valid
+  def capture_piece(row, col)
+    other_piece = game.piece_at(row, col)
+    raise 'You cannot capture your own piece' if other_piece && other_piece.user == user
+    other_piece.captured!
+    return true if other_piece && other_piece.user != user
+  end
+
+  # This updates a piece to captured
+  def captured!
+    update(is_captured: true)
+  end
+
+  def captured?
+    is_captured == true
+end
+
 
   def create_move!(from_row, from_col)
     last_move_number = game.moves.last ? game.moves.last.move_number : 0

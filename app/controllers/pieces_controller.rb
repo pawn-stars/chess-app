@@ -7,7 +7,11 @@ class PiecesController < ApplicationController
   def update
     piece = Piece.find(params[:id])
 
-    piece.move_to!(piece_params[:row].to_i, piece_params[:col].to_i)
+    if piece.move_to!(piece_params[:row].to_i, piece_params[:col].to_i)
+      Rails.logger.debug "Piece move to #{piece.row}, #{piece.col} is GOOD"
+    else
+      Rails.logger.debug "ERROR. PIECE SHOULD NOT MOVE"
+    end
 
     render json: piece
   end
