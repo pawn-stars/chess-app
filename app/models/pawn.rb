@@ -3,8 +3,8 @@ class Pawn < Piece
     return true if single_advance?(to_row, to_col)
     return true if double_advance?(to_row, to_col)
     return true if capture_move?(to_row, to_col)
-    return true if en_passant?(to_row, to_col) # need to send signal to capture logic
-    return false
+    return true if en_passant?(to_row, to_col) # need to send signal to capture logic for en passant
+    false
   end
 
   def promotion
@@ -13,51 +13,30 @@ class Pawn < Piece
   private
 
   def single_advance?(to_row, to_col)
-    if is_black?
-      to_row == row - 1 && to_col == col
-    else
-      to_row == row + 1 && to_col == col
-    end
+    valid_to_row = is_black ? row - 1 : row + 1
+    to_row == valid_to_row && to_col == col
   end
 
   def double_advance?(to_row, to_col)
-    if is_black?
-      to_row == 4 && to_col == col && moves.empty?
-    else
-      to_row == 3 && to_col == col && moves.empty?
-    end
+    valid_to_row = is_black ? 4 : 3
+    to_row == valid_to_row && to_col == col && moves.empty?
   end
 
   def capture_move?(to_row, to_col)
-    if is_black?
-      if to_row == row - 1 && ( to_col == col + 1 || to_col == col - 1)
-        enemy_occupied?(to_row, to_col)
-      end
-    else
-      if to_row == row + 1 && ( to_col == col + 1 || to_col == col - 1)
-        enemy_occupied?(to_row, to_col)
-      end
-    end
+    valid_to_row = is_black ? row - 1 : row + 1
+    to_row == valid_to_row && (to_col - col).abs == 1 && enemy_occupied?(to_row, to_col)
   end
 
   def en_passant?(to_row, to_col)
-    if is_black?
-      if moves.length == 1 && row == 4
-        if to_row == row - 1 && ( to_col == col + 1 || to_col == col - 1)
-          enemy_occupied?(to_row + 1, to_col)
-        end
-      end
-    else
-      if moves.length == 1 && row == 3
-        if to_row == row + 1 && ( to_col == col + 1 || to_col == col - 1)
-          enemy_occupied?(to_row - 1, to_col)
-        end
-      end
-    end
+    valid_to_row = is_black ? row - 1 : row + 1
+    valid_row = is_black ? 4 : 3
+    return false unless moves.length == 1 && row == valid_row
+    return false unless to_row == valid_to_row && (to_col - col).abs == 1
+    enemy_occupied?(row, to_col)
   end
 
-  def enemy_occupied?(row, col)
-    piece = Game::Board.new(game.pieces)[row][col]
-    piece && piece.user_id != user_id
+  def enemy_occupied?(check_row, check_col)
+    piece = Game::Board.new(game.pieces).grid[check_row][check_col]
+    piece && !piece.captured? && piece.user_id != user_id
   end
 end
