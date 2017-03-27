@@ -1,3 +1,5 @@
+# rubocop:disable LineLength
+
 class Piece < ApplicationRecord
   belongs_to :user
   belongs_to :game
@@ -26,6 +28,22 @@ class Piece < ApplicationRecord
     update_attributes(row: to_row, col: to_col)
     create_move!(from_row, from_col)
   end   # method move_to!
+
+  def capture_piece(row, col)
+    other_piece = game.piece_at(row, col)
+    raise 'You cannot capture your own piece' if other_piece && other_piece.user == user
+    other_piece.captured!
+    return true if other_piece && other_piece.user != user
+  end
+
+  # This updates a piece to captured
+  def captured!
+    update(is_captured: true)
+  end
+
+  def captured?
+    is_captured == true
+  end
 
   private
 
