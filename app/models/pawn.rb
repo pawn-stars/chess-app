@@ -37,7 +37,6 @@ class Pawn < Piece
 
   def enemy_occupied?(check_row, check_col)
     piece = Game::Board.new(game.pieces).grid[check_row][check_col]
-    p piece
     piece && !piece.captured? && piece.user_id != user_id
   end
 end
