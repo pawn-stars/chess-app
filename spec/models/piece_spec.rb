@@ -51,8 +51,8 @@ RSpec.describe Piece, type: :model do
     end
 
     # MeO tests for move_to! - test valid_move? and its called methods
-    from_row = 3
-    from_col = 2
+    FROM_ROW = 3
+    FROM_COL = 2
 
     # PRIVATE method move_nil?
     it "tests private method move_nil? with a nil move" do

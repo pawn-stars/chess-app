@@ -16,18 +16,15 @@ class Piece < ApplicationRecord
   end
 
   def move_to!(to_row, to_col)
-    # rubocop: disable LineLength
     Rails.logger.debug "Model move_to. from: #{row},#{col} to: #{to_row},#{to_col}"
 
-    if valid_move?(to_row, to_col)
-      from_row = row   # needed for create_move if valid_move? true
-      from_col = col   # needed for create_move if valid_move? true
-      Rails.logger.debug "valid_move result TRUE. Piece stays at new location."
-      update_attributes(row: to_row, col: to_col)
-      create_move!(from_row, from_col)
-    else
-      Rails.logger.debug "valid move result FALSE. Piece pop back when games show page reloaded."
-    end # method move_to!
+    return unless valid_move?(to_row, to_col)
+
+    from_row = row   # needed for create_move if valid_move? true
+    from_col = col   # needed for create_move if valid_move? true
+    Rails.logger.debug "valid_move result TRUE. Piece stays at new location."
+    update_attributes(row: to_row, col: to_col)
+    create_move!(from_row, from_col)
   end   # method move_to!
 
   private
@@ -37,7 +34,7 @@ class Piece < ApplicationRecord
     return false if move_out_of_bounds?(to_row, to_col)
     return false unless move_legal?(to_row, to_col)
     return false if move_obstructed?(to_row, to_col)
-    return false if move_destination_obstructed(to_row, to_col)
+    return false if move_destination_obstructed?(to_row, to_col)
     true
   end   # method valid_move?
 
@@ -66,7 +63,7 @@ class Piece < ApplicationRecord
     false
   end   # move_obstructed
 
-  def move_destination_obstructed(_to_row, _to_col)
+  def move_destination_obstructed?(_to_row, _to_col)
     false
   end # method move_destination_obstructed
 
