@@ -18,16 +18,13 @@ class Piece < ApplicationRecord
   end
 
   def move_to!(to_row, to_col)
-    Rails.logger.debug "Model move_to. from: #{row},#{col} to: #{to_row},#{to_col}"
-
     return unless valid_move?(to_row, to_col)
 
-    from_row = row   # needed for create_move if valid_move? true
-    from_col = col   # needed for create_move if valid_move? true
-    Rails.logger.debug "valid_move result TRUE. Piece stays at new location."
+    from_row = row
+    from_col = col
     update_attributes(row: to_row, col: to_col)
     create_move!(from_row, from_col)
-  end   # method move_to!
+  end
 
   def capture_piece(row, col)
     other_piece = game.piece_at(row, col)
@@ -51,19 +48,18 @@ class Piece < ApplicationRecord
     return false if move_nil?(to_row, to_col)
     return false if move_out_of_bounds?(to_row, to_col)
     return false unless move_legal?(to_row, to_col)
-    return false if move_obstructed?(to_row, to_col)
     return false if move_destination_obstructed?(to_row, to_col)
+    return false if move_obstructed?(to_row, to_col)
     true
-  end   # method valid_move?
+  end
 
   def move_nil?(to_row, to_col)
-    Rails.logger.debug "NIL MOVE"
     row == to_row && col == to_col
-  end   # method move_nil?
+  end
 
   def move_out_of_bounds?(to_row, to_col)
     to_row < 0 || to_row > 7 || to_col < 0 || to_col > 7
-  end   # method move_out_of_bounds?
+  end
 
   def move_legal?(to_row, to_col)
     # Piece sub-classes MUST implement move_legal? method. See King.rb for example
@@ -75,15 +71,15 @@ class Piece < ApplicationRecord
     else
       row == to_row || col == to_col || (row - to_row).abs == (col - to_col).abs
     end
-  end   # method move_legal
-
-  def move_obstructed?(_to_row, _to_col)
-    false
-  end   # move_obstructed
+  end
 
   def move_destination_obstructed?(_to_row, _to_col)
     false
-  end # method move_destination_obstructed
+  end
+
+  def move_obstructed?(_to_row, _to_col)
+    false
+  end
 
   def create_move!(from_row, from_col)
     last_move_number = game.moves.last ? game.moves.last.move_number : 0
@@ -94,5 +90,5 @@ class Piece < ApplicationRecord
       move_type: nil, # to be implemented later
       game_id: game.id
     )
-  end # method create_move!
+  end
 end

@@ -6,7 +6,6 @@ class PiecesController < ApplicationController
 
   def update
     piece = Piece.find(params[:id])
-    Rails.logger.debug "PIECE Controller Update. call move_to in pieces model"
 
     piece.move_to!(piece_params[:row].to_i, piece_params[:col].to_i)
 
