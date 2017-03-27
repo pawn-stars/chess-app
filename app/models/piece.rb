@@ -125,6 +125,9 @@ class Piece < ApplicationRecord
         true
       else
         Rails.logger.debug "Destination contains opponent piece. capture possible."
+
+        # call capture logic
+        other_piece.update(is_captured: true)
         false
       end
     else
@@ -138,7 +141,7 @@ class Piece < ApplicationRecord
   # moved capture piece methods to private - after verify that move to new square is valid
   def capture_piece(row, col)
     other_piece = game.piece_at(row, col)
-    raise 'You cannot capture your own piece' if other_piece && other_piece.user == user
+    # raise 'You cannot capture your own piece' if other_piece && other_piece.user == user
     other_piece.captured!
     return true if other_piece && other_piece.user != user
   end
@@ -150,7 +153,7 @@ class Piece < ApplicationRecord
 
   def captured?
     is_captured == true
-end
+  end
 
 
   def create_move!(from_row, from_col)
