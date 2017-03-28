@@ -5,6 +5,7 @@ class Piece < ApplicationRecord
 
   scope :are_captured, -> { where(is_captured: true) }
   scope :are_not_captured, -> { where(is_captured: false) }
+  scope :piece_at, ->(row, col) { where(row: row, col: col) }
 
   def self.types
     %w(Pawn Rook Knight Bishop Queen King)

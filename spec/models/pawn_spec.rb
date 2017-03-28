@@ -25,155 +25,95 @@ RSpec.describe Pawn, type: :model do
   end
 
   describe '#move_legal?' do
-    context 'pawn is white' do
-      before(:example) do
-        Piece.delete_all
-        @pawn = @game.pieces.create(
-          row: 1, col: 1, type: Pawn, is_black: false, user: @white
-        )
-      end
+    def forward_one(pawn)
+      pawn.is_black ? -1 : 1
+    end
 
-      let(:forward_one) { 1 }
-      let(:forward_two) { 2 }
+    def forward_two(pawn)
+      pawn.is_black ? -2 : 2
+    end
 
-      it 'allows moving forward one square' do
-        to_row = @pawn.row + forward_one
-        to_col = @pawn.col
-        expect(@pawn.move_legal?(to_row, to_col)).to be_truthy
-      end
+    def back_one(pawn)
+      pawn.is_black ? 1 : -1
+    end
 
-      it 'allows only the first move to be forward two squares' do
-        to_row = @pawn.row + forward_two
-        to_col = @pawn.col
-        expect(@pawn.move_legal?(to_row, to_col)).to be_truthy
+    before(:example) do
+      Piece.delete_all
+      white_pawn = @game.pieces.create(
+        row: 1, col: 1, type: Pawn, is_black: false, user: @white
+      )
+      black_pawn = @game.pieces.create(
+        row: 6, col: 1, type: Pawn, is_black: true, user: @black
+      )
+      @pawns = [white_pawn, black_pawn]
+    end
 
-        @pawn.move_to!(@pawn.row + forward_one, @pawn.col)
-        to_row = @pawn.row + forward_two
-        expect(@pawn.move_legal?(to_row, to_col)).to be_falsey
-      end
+    it 'allows moving forward one square' do
+      @pawns.each do |pawn|
+        to_row = pawn.row + forward_one(pawn)
+        to_col = pawn.col
 
-      it 'allows right-side capture moves' do
-        @game.pieces.create(row: 2, col: 2, is_black: true, user: @black)
-
-        to_row = @pawn.row + forward_one
-        to_col = @pawn.col + 1
-        expect(@pawn.move_legal?(to_row, to_col)).to be_truthy
-
-        to_col = @pawn.col - 1
-        expect(@pawn.move_legal?(to_row, to_col)).to be_falsey
-      end
-
-      it 'allows left-side capture moves' do
-        @game.pieces.create(row: 2, col: 0, is_black: true, user: @black)
-
-        to_row = @pawn.row + forward_one
-        to_col = @pawn.col - 1
-        expect(@pawn.move_legal?(to_row, to_col)).to be_truthy
-
-        to_col = @pawn.col + 1
-        expect(@pawn.move_legal?(to_row, to_col)).to be_falsey
-      end
-
-      it 'allows right-side en passant' do
-        @pawn.move_to!(3, @pawn.col)
-        @game.pieces.create(row: 3, col: @pawn.col + 1, is_black: true, user: @black)
-
-        to_row = @pawn.row + forward_one
-        to_col = @pawn.col + 1
-        expect(@pawn.move_legal?(to_row, to_col)).to be_truthy
-
-        to_col = @pawn.col - 1
-        expect(@pawn.move_legal?(to_row, to_col)).to be_falsey
-      end
-
-      it 'allows left-side en passant' do
-        @pawn.move_to!(3, @pawn.col)
-        @game.pieces.create(row: 3, col: @pawn.col - 1, is_black: true, user: @black)
-
-        to_row = @pawn.row + forward_one
-        to_col = @pawn.col - 1
-        expect(@pawn.move_legal?(to_row, to_col)).to be_truthy
-
-        to_col = @pawn.col + 1
-        expect(@pawn.move_legal?(to_row, to_col)).to be_falsey
+        expect(pawn.move_legal?(to_row, to_col)).to be_truthy
       end
     end
 
-    ############################################################################
-    ################################ Color Divider #############################
-    ############################################################################
+    it 'allows only the first move to be forward two squares' do
+      @pawns.each do |pawn|
+        to_row = pawn.row + forward_two(pawn)
+        to_col = pawn.col
+        expect(pawn.move_legal?(to_row, to_col)).to be_truthy
 
-    context 'pawn is black' do
-      before(:example) do
-        Piece.delete_all
-        @pawn = @game.pieces.create(
-          row: 6, col: 1, type: Pawn, is_black: true, user: @black
-        )
+        pawn.move_to!(pawn.row + forward_one(pawn), pawn.col)
+        to_row = pawn.row + forward_two(pawn)
+        expect(pawn.move_legal?(to_row, to_col)).to be_falsey
       end
+    end
 
-      let(:forward_one) { -1 }
-      let(:forward_two) { -2 }
+    it 'allows capture moves' do
+      [1, -1].each do |col_offset|
+        @pawns.each do |pawn|
+          if pawn.is_black
+            enemy = @game.pieces.create(row: 5, col: 1 + col_offset, is_black: false, user: @white)
+          else
+            enemy = @game.pieces.create(row: 2, col: 1 + col_offset, is_black: true, user: @black)
+          end
+          to_row = pawn.row + forward_one(pawn)
+          to_col = pawn.col + col_offset
+          expect(pawn.move_legal?(to_row, to_col)).to be_truthy
 
-      it 'allows moving forward one square' do
-        to_row = @pawn.row + forward_one
-        to_col = @pawn.col
-        expect(@pawn.move_legal?(to_row, to_col)).to be_truthy
+          to_col = pawn.col - col_offset
+          expect(pawn.move_legal?(to_row, to_col)).to be_falsey
+
+          enemy.destroy
+        end
       end
+    end
 
-      it 'allows only the first move to be forward two squares' do
-        to_row = @pawn.row + forward_two
-        to_col = @pawn.col
-        expect(@pawn.move_legal?(to_row, to_col)).to be_truthy
+    it 'allows en passant' do
+      [1, -1].each do |col_offset|
+        @pawns.each do |pawn|
+          enemy =
+            if pawn.is_black
+              @game.pieces.create(
+                row: 1, col: 1 + col_offset, type: Pawn, is_black: false, user: @white
+              )
+            else
+              @game.pieces.create(
+                row: 6, col: 1 + col_offset, type: Pawn, is_black: true, user: @black
+              )
+            end
 
-        @pawn.move_to!(@pawn.row + forward_one, @pawn.col)
-        to_row = @pawn.row + forward_two
-        expect(@pawn.move_legal?(to_row, to_col)).to be_falsey
-      end
+          enemy.move_to!(enemy.row + forward_two(enemy), enemy.col)
+          pawn.update(row: enemy.row)
+          to_row = pawn.row + forward_one(pawn)
+          to_col = pawn.col + col_offset
+          expect(pawn.move_legal?(to_row, to_col)).to be_truthy
 
-      it 'allows right-side capture moves' do
-        @game.pieces.create(row: 5, col: 2, is_black: false, user: @white)
+          to_col = pawn.col - col_offset
+          expect(pawn.move_legal?(to_row, to_col)).to be_falsey
 
-        to_row = @pawn.row + forward_one
-        to_col = @pawn.col + 1
-        expect(@pawn.move_legal?(to_row, to_col)).to be_truthy
-
-        to_col = @pawn.col - 1
-        expect(@pawn.move_legal?(to_row, to_col)).to be_falsey
-      end
-
-      it 'allows left-side capture moves' do
-        @game.pieces.create(row: 5, col: 0, is_black: false, user: @white)
-
-        to_row = @pawn.row + forward_one
-        to_col = @pawn.col - 1
-        expect(@pawn.move_legal?(to_row, to_col)).to be_truthy
-
-        to_col = @pawn.col + 1
-        expect(@pawn.move_legal?(to_row, to_col)).to be_falsey
-      end
-
-      it 'allows right-side en passant' do
-        @pawn.move_to!(4, @pawn.col)
-        @game.pieces.create(row: 4, col: @pawn.col + 1, is_black: false, user: @white)
-
-        to_row = @pawn.row + forward_one
-        to_col = @pawn.col + 1
-        expect(@pawn.move_legal?(to_row, to_col)).to be_truthy
-
-        to_col = @pawn.col - 1
-        expect(@pawn.move_legal?(to_row, to_col)).to be_falsey
-      end
-
-      it 'allows left-side en passant' do
-        @pawn.move_to!(4, @pawn.col)
-        @game.pieces.create(row: 4, col: @pawn.col - 1, is_black: false, user: @white)
-
-        to_row = @pawn.row + forward_one
-        to_col = @pawn.col - 1
-        expect(@pawn.move_legal?(to_row, to_col)).to be_truthy
-
-        to_col = @pawn.col + 1
-        expect(@pawn.move_legal?(to_row, to_col)).to be_falsey
+          enemy.destroy
+        end
       end
     end
   end

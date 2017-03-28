@@ -7,36 +7,48 @@ class Pawn < Piece
     false
   end
 
-  def promotion
-  end
-
   private
 
   def single_advance?(to_row, to_col)
-    valid_to_row = is_black ? row - 1 : row + 1
-    to_row == valid_to_row && to_col == col
+    to_row == row + forward_one && to_col == col
   end
 
   def double_advance?(to_row, to_col)
-    valid_to_row = is_black ? 4 : 3
-    to_row == valid_to_row && to_col == col && moves.empty?
+    to_row == row + forward_two && to_col == col && moves.empty?
   end
 
   def capture_move?(to_row, to_col)
-    valid_to_row = is_black ? row - 1 : row + 1
-    to_row == valid_to_row && (to_col - col).abs == 1 && enemy_occupied?(to_row, to_col)
+    to_row == row + forward_one && (to_col - col).abs == 1 && enemy_occupied?(to_row, to_col)
   end
 
   def en_passant?(to_row, to_col)
-    valid_to_row = is_black ? row - 1 : row + 1
-    valid_row = is_black ? 4 : 3
-    return false unless moves.length == 1 && row == valid_row
-    return false unless to_row == valid_to_row && (to_col - col).abs == 1
-    enemy_occupied?(row, to_col)
+    return false unless to_row == row + forward_one && (to_col - col).abs == 1
+    enemy = enemy_occupied?(to_row + back_one, to_col)
+    enemy.class == Pawn && enemy.en_passant_vuln?
   end
 
   def enemy_occupied?(check_row, check_col)
-    piece = Game::Board.new(game.pieces).grid[check_row][check_col]
-    piece && !piece.captured? && piece.user_id != user_id
+    game.pieces.are_not_captured.piece_at(check_row, check_col).first
+  end
+
+  def forward_one
+    is_black ? -1 : 1
+  end
+
+  def forward_two
+    is_black ? -2 : 2
+  end
+
+  def back_one
+    is_black ? 1 : -1
+  end
+
+  protected
+
+  def en_passant_vuln?
+    my_moves = moves
+    return false unless my_moves.length == 1
+    from_row = my_moves.first.from_position[0]
+    row - from_row == forward_two
   end
 end
