@@ -21,6 +21,10 @@ RSpec.describe Piece, type: :model do
       )
 
       @game = @user.games.create(white_player_id: @user)
+      FROM_ROW = 3
+      FROM_COL = 2
+      MOVE_ROW = 6
+      MOVE_COL = 1
     end
 
     before(:each) do
@@ -50,51 +54,151 @@ RSpec.describe Piece, type: :model do
       expect(move.game_id).to eq(@game.id)
     end
 
-    # MeO tests for move_to! - test valid_move? and its called methods
-    FROM_ROW = 3
-    FROM_COL = 2
+    # MeO tests for move_to! - test private valid_move? and its called methods
 
-    # PRIVATE method move_nil?
-    it "tests private method move_nil? with a nil move" do
+    # private method move_nil?
+    it "tests move_nil? with a nil move" do
       piece = @game.pieces.create(
         row: FROM_ROW, col: FROM_COL, is_captured: false, user: @user
       )
       expect(piece.send(:move_nil?, FROM_ROW, FROM_COL)).to be true
     end
-    it "tests private method move_nil? with a non-nil move" do
+    it "tests move_nil? with a valid move" do
       piece = @game.pieces.create(
         row: FROM_ROW, col: FROM_COL, is_captured: false, user: @user
       )
       expect(piece.send(:move_nil?, 7, 7)).to be false
     end
 
-    # PRIVATE method move_out_bounds
-    it "tests private method move_out_of_bounds? with an off-board move" do
+    # private method move_out_bounds
+    it "tests move_out_of_bounds? with an off-board move" do
       piece = @game.pieces.create(
         row: FROM_ROW, col: FROM_COL, is_captured: false, user: @user
       )
       expect(piece.send(:move_out_of_bounds?, FROM_ROW, 8)).to be true
     end
-    it "tests private method move_out_of_bounds? with an on-board move" do
+    it "tests move_out_of_bounds? with an on-board move" do
       piece = @game.pieces.create(
         row: FROM_ROW, col: FROM_COL, is_captured: false, user: @user
       )
       expect(piece.send(:move_out_of_bounds?, FROM_ROW + 1, FROM_COL + 1)).to be false
     end
 
+    # private method move_destination_same_side?
+    it "tests move_destination_same_side? with empty destination square" do
+      piece = @game.pieces.create(
+        row: MOVE_ROW, col: MOVE_COL, is_captured: false, user: @user
+      )
+      expect(piece.send(:move_destination_same_side?, MOVE_ROW - 4, MOVE_COL)).to be nil
+    end
+
+    it "tests move_destination_same_side? with same side piece at destination" do
+      piece1 = @game.pieces.create(
+        row: MOVE_ROW, col: MOVE_COL, is_captured: false, is_black: true, user: @user
+      )
+      piece2 = @game.pieces.create(
+        row: MOVE_ROW, col: MOVE_COL + 4, is_captured: false, is_black: true, user: @user
+      )
+      expect(piece1.send(:move_destination_same_side?, MOVE_ROW, MOVE_COL + 4)).to be true
+    end
+
+    it "tests move_destination_same_side? with other side piece at destination" do
+      piece1 = @game.pieces.create(
+        row: MOVE_ROW, col: MOVE_COL, is_captured: false, is_black: true, user: @user
+      )
+      piece2 = @game.pieces.create(
+        row: MOVE_ROW, col: MOVE_COL + 4, is_captured: false, is_black: false, user: @user
+      )
+      expect(piece1.send(:move_destination_same_side?, MOVE_ROW, MOVE_COL + 4)).to be false
+    end
+
+    # private method move_obstructed
+    it "tests move_obstructed with horizontal move and no obstruction" do
+      piece = @game.pieces.create(
+        row: MOVE_ROW, col: MOVE_COL, is_captured: false, user: @user
+      )
+      expect(piece.send(:move_obstructed?, MOVE_ROW, MOVE_COL + 6)).to be false
+    end
+
+    it "tests move_obstructed with horizontal move and obstruction" do
+      piece1 = @game.pieces.create(
+        row: MOVE_ROW, col: MOVE_COL, is_captured: false, user: @user
+      )
+      piece2 = @game.pieces.create(
+        row: MOVE_ROW, col: MOVE_COL + 2, is_captured: false, user: @user
+      )
+      expect(piece1.send(:move_obstructed?, MOVE_ROW, MOVE_COL + 6)).to be true
+    end
+
+    it "tests move_obstructed with vertical move and no obstruction" do
+      piece = @game.pieces.create(
+        row: MOVE_ROW, col: MOVE_COL, is_captured: false, user: @user
+      )
+      expect(piece.send(:move_obstructed?, MOVE_ROW - 4, MOVE_COL)).to be false
+    end
+
+    it "tests move_obstructed with vertical move and obstruction" do
+      piece1 = @game.pieces.create(
+        row: MOVE_ROW, col: MOVE_COL, is_captured: false, user: @user
+      )
+      piece2 = @game.pieces.create(
+        row: MOVE_ROW - 2, col: MOVE_COL, is_captured: false, user: @user
+      )
+      expect(piece1.send(:move_obstructed?, MOVE_ROW - 4, MOVE_COL)).to be true
+    end
+
+    it "tests move_obstructed with diagonal move and no obstruction" do
+      piece = @game.pieces.create(
+        row: MOVE_ROW, col: MOVE_COL, is_captured: false, user: @user
+      )
+      expect(piece.send(:move_obstructed?, MOVE_ROW - 4, MOVE_COL + 4)).to be false
+    end
+
+    it "tests move_obstructed with diagonal move and obstruction" do
+      piece1 = @game.pieces.create(
+        row: MOVE_ROW, col: MOVE_COL, is_captured: false, user: @user
+      )
+      piece2 = @game.pieces.create(
+        row: MOVE_ROW - 2, col: MOVE_COL + 2, is_captured: false, user: @user
+      )
+      expect(piece1.send(:move_obstructed?, MOVE_ROW - 4, MOVE_COL + 4)).to be true
+    end
+
     # Private method valid_move?
-    it "tests private method valid_move? with a nil move" do
+    it "tests valid_move? with a nil move" do
       piece = @game.pieces.create(
         row: FROM_ROW, col: FROM_COL, is_captured: false, user: @user
       )
       expect(piece.send(:valid_move?, FROM_ROW, FROM_COL)).to be false
     end
 
-    it "tests private method valid_move? with an out of bounds move" do
+    it "tests valid_move? with an out of bounds move" do
       piece = @game.pieces.create(
         row: FROM_ROW, col: FROM_COL, is_captured: false, user: @user
       )
       expect(piece.send(:valid_move?, FROM_ROW, 8)).to be false
+    end
+
+    it "tests valid_move? with same side piece at destination" do
+      piece1 = @game.pieces.create(
+        row: FROM_ROW, col: FROM_COL, is_captured: false, is_black: true, user: @user
+      )
+      piece2 = @game.pieces.create(
+        row: FROM_ROW + 3, col: FROM_COL + 3, is_captured: false, is_black: true, user: @user
+      )
+      expect(piece1.send(:valid_move?, FROM_ROW + 3, FROM_ROW + 3)).to be false
+    end
+
+    it "tests method valid_move? with a diagonal obstructed move" do
+      row = 6
+      col = 1
+      piece1 = @game.pieces.create(
+        row: row, col: col, is_captured: false, user: @user
+      )
+      piece2 = @game.pieces.create(
+        row: row - 2, col: col + 2, is_captured: false, user: @user
+      )
+      expect(piece1.send(:valid_move?, row - 4, col + 4)).to be false
     end
 
     # move_to! with an out-of-bounds move
@@ -106,6 +210,21 @@ RSpec.describe Piece, type: :model do
       piece.move_to!(FROM_ROW, to_col)
       expect(piece.row).to eq(FROM_ROW)
       expect(piece.col).to eq(FROM_COL)
+    end
+
+    # move_to! with an obstructed horizontal move
+    it "should not move the piece because of horizontal obstruction" do
+      row = 4
+      col = 1
+      piece1 = @game.pieces.create(
+        row: row, col: col, is_captured: false, user: @user
+      )
+      piece2 = @game.pieces.create(
+        row: row, col: col + 2, is_captured: false, user: @user
+      )
+      piece1.move_to!(row, col + 4)
+      expect(piece1.row).to eq(row)
+      expect(piece1.col).to eq(col)
     end
 
     # remove test after all piece subclass tests complete
