@@ -5,6 +5,7 @@ class GamesController < ApplicationController
 
   def create
     game = Game.create(white_player_id: current_user.id)
+    current_user << game
     redirect_to game
   end
 
@@ -22,10 +23,10 @@ class GamesController < ApplicationController
 
   def update
     @game = Game.find(params[:id])
-
     @game.update_attributes(game_params)
     if @game.valid?
-      redirect_to game_path(@game)
+      current_user << game
+      redirect_to @game
     else
       render :index, text: "Not Allowed"
     end

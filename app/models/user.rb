@@ -12,4 +12,11 @@ class User < ApplicationRecord
                           length: { maximum: 16, minimum: 3 },
                           format: { with: /\A\w+\z/,
                                     message: "only allows letters and numbers" }
+  validates :validate_max_players_per_game
+
+  def validate_max_players_per_game
+    if game.users.count == 2
+      errors.add(:games, "Game already has two players")
+    end
+  end
 end
