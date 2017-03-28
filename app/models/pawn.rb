@@ -24,7 +24,7 @@ class Pawn < Piece
   def en_passant?(to_row, to_col)
     return false unless to_row == row + forward_one && (to_col - col).abs == 1
     enemy = enemy_occupied?(to_row + back_one, to_col)
-    enemy.class == Pawn && enemy.en_passant_vuln?
+    enemy && enemy.class == Pawn && enemy.en_passant_vuln?
   end
 
   def enemy_occupied?(check_row, check_col)
