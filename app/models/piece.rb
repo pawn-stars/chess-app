@@ -6,6 +6,14 @@ class Piece < ApplicationRecord
   scope :are_captured, -> { where(row: -1, col: -1) }
   scope :are_not_captured, -> { where("row > ? AND col > ?", -1, -1) }
 
+  def white?
+    user_id == game.white_player_id
+  end
+
+  def black?
+    user_id == game.black_player_id
+  end
+
   def self.types
     %w(Pawn Rook Knight Bishop Queen King)
   end

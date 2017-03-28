@@ -4,4 +4,8 @@ class Bishop < Piece
     col_diff = (col - to_col).abs
     row_diff == col_diff
   end
+
+  def display_piece
+    black? ? "&#9821;" : "&#9815;"
+  end
 end
