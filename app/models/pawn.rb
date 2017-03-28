@@ -1,2 +1,54 @@
 class Pawn < Piece
+  def move_legal?(to_row, to_col)
+    return true if single_advance?(to_row, to_col)
+    return true if double_advance?(to_row, to_col)
+    return true if capture_move?(to_row, to_col)
+    return true if en_passant?(to_row, to_col) # need to send signal to capture logic for en passant
+    false
+  end
+
+  private
+
+  def single_advance?(to_row, to_col)
+    to_row == row + forward_one && to_col == col
+  end
+
+  def double_advance?(to_row, to_col)
+    to_row == row + forward_two && to_col == col && moves.empty?
+  end
+
+  def capture_move?(to_row, to_col)
+    to_row == row + forward_one && (to_col - col).abs == 1 && enemy_occupied?(to_row, to_col)
+  end
+
+  def en_passant?(to_row, to_col)
+    return false unless to_row == row + forward_one && (to_col - col).abs == 1
+    enemy = enemy_occupied?(to_row + back_one, to_col)
+    enemy && enemy.class == Pawn && enemy.en_passant_vuln?
+  end
+
+  def enemy_occupied?(check_row, check_col)
+    game.pieces.are_not_captured.piece_at(check_row, check_col).first
+  end
+
+  def forward_one
+    is_black ? -1 : 1
+  end
+
+  def forward_two
+    is_black ? -2 : 2
+  end
+
+  def back_one
+    is_black ? 1 : -1
+  end
+
+  protected
+
+  def en_passant_vuln?
+    my_moves = moves
+    return false unless my_moves.length == 1
+    from_row = my_moves.first.from_position[0]
+    row - from_row == forward_two
+  end
 end
