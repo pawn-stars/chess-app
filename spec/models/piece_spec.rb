@@ -169,6 +169,10 @@ RSpec.describe Piece, type: :model do
       )
     end
 
+    after(:all) do
+      DatabaseCleaner.clean_with(:deletion)
+    end
+
     it "should capture a piece" do
       piece1 = @user1.pieces.create(row: 0, col: 0, game_id: @game.id)
       piece2 = @user2.pieces.create(
