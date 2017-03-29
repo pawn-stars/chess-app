@@ -9,21 +9,20 @@ RSpec.describe Piece, type: :model do
 
   describe "#move_to!" do
     before(:all) do
-      User.delete_all
-      Game.delete_all
-      Move.delete_all
-
       @user = User.create(
         email: 'foobar@foobar.com',
         screen_name: 'foobar',
         password: 'foobar',
         password_confirmation: 'foobar'
       )
-
       @game = @user.games.create(white_player_id: @user)
     end
 
-    before(:each) do
+    after(:all) do
+      DatabaseCleaner.clean_with(:deletion)
+    end
+
+    before(:example) do
       Piece.delete_all
     end
 
@@ -152,13 +151,9 @@ RSpec.describe Piece, type: :model do
 
   describe "#capture" do
     before(:all) do
-      User.delete_all
-      Game.delete_all
-      Piece.delete_all
-
       @user1 = User.create(
-        email: 'foobar@foobar.com',
-        screen_name: 'foobar',
+        email: 'white@foobar.com',
+        screen_name: 'white',
         password: 'foobar',
         password_confirmation: 'foobar'
       )
@@ -168,7 +163,6 @@ RSpec.describe Piece, type: :model do
         password: 'foobar',
         password_confirmation: 'foobar'
       )
-
       @game = @user1.games.create(
         white_player_id: @user1,
         black_player_id: @user2

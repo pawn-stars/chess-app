@@ -1,9 +1,4 @@
-User.delete_all
-Participation.delete_all
-Game.delete_all
-Piece.delete_all
-Move.delete_all
-
+DatabaseCleaner.clean_with(:truncation)
 
 2.times do |n|
   User.create(
