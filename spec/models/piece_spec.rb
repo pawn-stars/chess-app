@@ -149,24 +149,25 @@ RSpec.describe Piece, type: :model do
     end
   end
 
-  describe "#capture" do
+  describe "#capture_piece" do
     before(:all) do
-      @user1 = User.create(
+      @white = User.create(
         email: 'white@foobar.com',
         screen_name: 'white',
         password: 'foobar',
         password_confirmation: 'foobar'
       )
-      @user2 = User.create(
+      @black = User.create(
         email: 'black@foobar.com',
         screen_name: 'black',
         password: 'foobar',
         password_confirmation: 'foobar'
       )
-      @game = @user1.games.create(
-        white_player_id: @user1,
-        black_player_id: @user2
+      @game = @white.games.create(
+        white_player_id: @white,
+        black_player_id: @black
       )
+      @black.games << @game
     end
 
     after(:all) do
@@ -174,29 +175,31 @@ RSpec.describe Piece, type: :model do
     end
 
     it "should capture a piece" do
-      piece1 = @user1.pieces.create(row: 0, col: 0, game_id: @game.id)
-      piece2 = @user2.pieces.create(
+      piece1 = @white.pieces.create(row: 0, col: 0, game_id: @game.id, is_black: false)
+      piece2 = @black.pieces.create(
         row: 0,
         col: 1,
         is_captured: false,
-        game_id: @game.id
+        game_id: @game.id,
+        is_black: true
       )
-      expect(piece1.capture_piece(0, 1)).to eq(true)
+      expect(piece1.capture_piece(0, 1)).to be_truthy
       piece2.reload
-      expect(piece2.captured?).to eq(true)
+      expect(piece2.is_captured).to be_truthy
     end
 
     it "should not capture a player's own piece" do
-      piece1 = @user1.pieces.create(row: 0, col: 0, game_id: @game.id)
-      piece2 = @user1.pieces.create(
+      piece1 = @white.pieces.create(row: 0, col: 0, game_id: @game.id, is_black: false)
+      piece2 = @white.pieces.create(
         row: 0,
         col: 1,
         is_captured: false,
-        game_id: @game.id
+        game_id: @game.id,
+        is_black: false
       )
-      expect { piece1.capture_piece(0, 1) }.to raise_error(RuntimeError)
-      piece2.reload # fetch it from the DB again
-      expect(piece2.captured?).to eq(false)
+      piece1.capture_piece(0, 1)
+      piece2.reload
+      expect(piece2.is_captured).to be_falsey
     end
   end
 end

@@ -40,10 +40,6 @@ class Piece < ApplicationRecord
     update(is_captured: true)
   end
 
-  def captured?
-    is_captured == true
-  end
-
   private
 
   def valid_move?(to_row, to_col)
