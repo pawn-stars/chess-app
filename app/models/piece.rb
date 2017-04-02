@@ -90,4 +90,9 @@ class Piece < ApplicationRecord
       game_id: game.id
     )
   end
+
+  def enemy_at(check_row, check_col)
+    enemy = game.pieces.are_not_captured.piece_at(check_row, check_col).first
+    enemy if enemy && enemy.is_black != is_black
+  end
 end

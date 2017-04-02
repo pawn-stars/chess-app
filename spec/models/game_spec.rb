@@ -24,22 +24,22 @@ RSpec.describe Game, type: :model do
     end
   end
 
-  describe "Board" do
+  context "Board" do
     before(:all) do
-      User.delete_all
-      Game.delete_all
-
       @user = User.create(
         email: 'foobar@foobar.com',
         screen_name: 'foobar',
         password: 'foobar',
         password_confirmation: 'foobar'
       )
-
       @game = @user.games.create(white_player_id: @user)
     end
 
-    before(:each) do
+    after(:all) do
+      DatabaseCleaner.clean_with(:deletion)
+    end
+
+    before(:example) do
       Piece.delete_all
     end
 

@@ -2,9 +2,6 @@ require 'rails_helper'
 
 RSpec.describe Pawn, type: :model do
   before(:all) do
-    User.delete_all
-    Game.delete_all
-
     @white = User.create(
       email: 'white@foobar.com',
       screen_name: 'white',
@@ -22,6 +19,10 @@ RSpec.describe Pawn, type: :model do
       black_player_id: @black
     )
     @black.games << @game
+  end
+
+  after(:all) do
+    DatabaseCleaner.clean_with(:deletion)
   end
 
   describe '#move_legal?' do
