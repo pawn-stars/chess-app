@@ -27,6 +27,10 @@ class Pawn < Piece
     enemy && enemy.class == Pawn && enemy.en_passant_vuln?
   end
 
+  def capture_piece(row, col)
+    en_passant?(row, col) ? super(row + back_one, col) : super(row, col)
+  end
+
   def forward_one
     is_black ? -1 : 1
   end

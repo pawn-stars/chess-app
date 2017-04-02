@@ -53,49 +53,55 @@ RSpec.describe Piece, type: :model do
     FROM_ROW = 3
     FROM_COL = 2
 
-    # PRIVATE method move_nil?
-    it "tests private method move_nil? with a nil move" do
-      piece = @game.pieces.create(
-        row: FROM_ROW, col: FROM_COL, is_captured: false, user: @user
-      )
-      expect(piece.send(:move_nil?, FROM_ROW, FROM_COL)).to be true
-    end
-    it "tests private method move_nil? with a non-nil move" do
-      piece = @game.pieces.create(
-        row: FROM_ROW, col: FROM_COL, is_captured: false, user: @user
-      )
-      expect(piece.send(:move_nil?, 7, 7)).to be false
+    describe "#move_nil?" do
+      it "tests private method move_nil? with a nil move" do
+        piece = @game.pieces.create(
+          row: FROM_ROW, col: FROM_COL, is_captured: false, user: @user
+        )
+        expect(piece.send(:move_nil?, FROM_ROW, FROM_COL)).to be true
+      end
+
+      it "tests private method move_nil? with a non-nil move" do
+        piece = @game.pieces.create(
+          row: FROM_ROW, col: FROM_COL, is_captured: false, user: @user
+        )
+        expect(piece.send(:move_nil?, 7, 7)).to be false
+      end
     end
 
-    # PRIVATE method move_out_bounds
-    it "tests private method move_out_of_bounds? with an off-board move" do
-      piece = @game.pieces.create(
-        row: FROM_ROW, col: FROM_COL, is_captured: false, user: @user
-      )
-      expect(piece.send(:move_out_of_bounds?, FROM_ROW, 8)).to be true
-    end
-    it "tests private method move_out_of_bounds? with an on-board move" do
-      piece = @game.pieces.create(
-        row: FROM_ROW, col: FROM_COL, is_captured: false, user: @user
-      )
-      expect(piece.send(:move_out_of_bounds?, FROM_ROW + 1, FROM_COL + 1)).to be false
+    describe "#move_out_bounds?" do
+      it "tests private method move_out_of_bounds? with an off-board move" do
+        piece = @game.pieces.create(
+          row: FROM_ROW, col: FROM_COL, is_captured: false, user: @user
+        )
+        expect(piece.send(:move_out_of_bounds?, FROM_ROW, 8)).to be true
+      end
+
+      it "tests private method move_out_of_bounds? with an on-board move" do
+        piece = @game.pieces.create(
+          row: FROM_ROW, col: FROM_COL, is_captured: false, user: @user
+        )
+        expect(piece.send(:move_out_of_bounds?, FROM_ROW + 1, FROM_COL + 1)).to be false
+      end
     end
 
-    # Private method valid_move?
-    it "tests private method valid_move? with a nil move" do
-      piece = @game.pieces.create(
-        row: FROM_ROW, col: FROM_COL, is_captured: false, user: @user
-      )
-      expect(piece.send(:valid_move?, FROM_ROW, FROM_COL)).to be false
+    describe "#valid_move?" do
+      it "tests private method valid_move? with a nil move" do
+        piece = @game.pieces.create(
+          row: FROM_ROW, col: FROM_COL, is_captured: false, user: @user
+        )
+        expect(piece.send(:valid_move?, FROM_ROW, FROM_COL)).to be false
+      end
+
+      it "tests private method valid_move? with an out of bounds move" do
+        piece = @game.pieces.create(
+          row: FROM_ROW, col: FROM_COL, is_captured: false, user: @user
+        )
+        expect(piece.send(:valid_move?, FROM_ROW, 8)).to be false
+      end
     end
 
-    it "tests private method valid_move? with an out of bounds move" do
-      piece = @game.pieces.create(
-        row: FROM_ROW, col: FROM_COL, is_captured: false, user: @user
-      )
-      expect(piece.send(:valid_move?, FROM_ROW, 8)).to be false
-    end
-
+    # This should be integrated into the '#move_to!' group
     # move_to! with an out-of-bounds move
     it "should not move the piece out of bounds" do
       to_col = 8
@@ -107,92 +113,101 @@ RSpec.describe Piece, type: :model do
       expect(piece.col).to eq(FROM_COL)
     end
 
-    # remove test after all piece subclass tests complete
-    it "should not move the piece due to illegal move" do
-      piece = @game.pieces.create(
-        row: FROM_ROW, col: FROM_COL, is_captured: false, user: @user
-      )
-      piece.move_to!(FROM_ROW + 2, FROM_COL + 1)
-      expect(piece.row).to eq(FROM_ROW)
-      expect(piece.col).to eq(FROM_COL)
-    end
-    # remove test after all piece subclass tests complete
-    it "should move the piece: horizonal move" do
-      to_col = 7
-      piece = @game.pieces.create(
-        row: FROM_ROW, col: FROM_COL, is_captured: false, user: @user
-      )
-      piece.move_to!(FROM_ROW, to_col)
-      expect(piece.row).to eq(FROM_ROW)
-      expect(piece.col).to eq(to_col)
-    end
-    # remove test after all piece subclass tests complete
-    it "should move the piece: vertical move" do
-      to_row = 7
-      piece = @game.pieces.create(
-        row: FROM_ROW, col: FROM_COL, is_captured: false, user: @user
-      )
-      piece.move_to!(to_row, FROM_COL)
-      expect(piece.row).to eq(to_row)
-      expect(piece.col).to eq(FROM_COL)
-    end
-    # remove test after all piece subclass tests complete
-    it "should move the piece: diagonal move" do
-      to_row = 6
-      to_col = 5
-      piece = @game.pieces.create(
-        row: FROM_ROW, col: FROM_COL, is_captured: false, user: @user
-      )
-      piece.move_to!(to_row, to_col)
-      expect(piece.row).to eq(to_row)
-      expect(piece.col).to eq(to_col)
+    # remove after all piece subclass tests complete
+    describe "#move_legal?" do
+      it "should not move the piece due to illegal move" do
+        piece = @game.pieces.create(
+          row: FROM_ROW, col: FROM_COL, is_captured: false, user: @user
+        )
+        piece.move_to!(FROM_ROW + 2, FROM_COL + 1)
+        expect(piece.row).to eq(FROM_ROW)
+        expect(piece.col).to eq(FROM_COL)
+      end
+
+      it "should move the piece: horizonal move" do
+        to_col = 7
+        piece = @game.pieces.create(
+          row: FROM_ROW, col: FROM_COL, is_captured: false, user: @user
+        )
+        piece.move_to!(FROM_ROW, to_col)
+        expect(piece.row).to eq(FROM_ROW)
+        expect(piece.col).to eq(to_col)
+      end
+
+      it "should move the piece: vertical move" do
+        to_row = 7
+        piece = @game.pieces.create(
+          row: FROM_ROW, col: FROM_COL, is_captured: false, user: @user
+        )
+        piece.move_to!(to_row, FROM_COL)
+        expect(piece.row).to eq(to_row)
+        expect(piece.col).to eq(FROM_COL)
+      end
+
+      it "should move the piece: diagonal move" do
+        to_row = 6
+        to_col = 5
+        piece = @game.pieces.create(
+          row: FROM_ROW, col: FROM_COL, is_captured: false, user: @user
+        )
+        piece.move_to!(to_row, to_col)
+        expect(piece.row).to eq(to_row)
+        expect(piece.col).to eq(to_col)
+      end
     end
   end
 
-  describe "#capture" do
+  describe "#capture_piece" do
     before(:all) do
-      @user1 = User.create(
+      @white = User.create(
         email: 'white@foobar.com',
         screen_name: 'white',
         password: 'foobar',
         password_confirmation: 'foobar'
       )
-      @user2 = User.create(
+      @black = User.create(
         email: 'black@foobar.com',
         screen_name: 'black',
         password: 'foobar',
         password_confirmation: 'foobar'
       )
-      @game = @user1.games.create(
-        white_player_id: @user1,
-        black_player_id: @user2
+      @game = @white.games.create(
+        white_player_id: @white,
+        black_player_id: @black
       )
+      @black.games << @game
+    end
+
+    after(:all) do
+      DatabaseCleaner.clean_with(:deletion)
     end
 
     it "should capture a piece" do
-      piece1 = @user1.pieces.create(row: 0, col: 0, game_id: @game.id)
-      piece2 = @user2.pieces.create(
+      piece1 = @white.pieces.create(row: 0, col: 0, game_id: @game.id, is_black: false)
+      piece2 = @black.pieces.create(
         row: 0,
         col: 1,
         is_captured: false,
-        game_id: @game.id
+        game_id: @game.id,
+        is_black: true
       )
-      expect(piece1.capture_piece(0, 1)).to eq(true)
+      expect(piece1.capture_piece(0, 1)).to be_truthy
       piece2.reload
-      expect(piece2.captured?).to eq(true)
+      expect(piece2.is_captured).to be_truthy
     end
 
     it "should not capture a player's own piece" do
-      piece1 = @user1.pieces.create(row: 0, col: 0, game_id: @game.id)
-      piece2 = @user1.pieces.create(
+      piece1 = @white.pieces.create(row: 0, col: 0, game_id: @game.id, is_black: false)
+      piece2 = @white.pieces.create(
         row: 0,
         col: 1,
         is_captured: false,
-        game_id: @game.id
+        game_id: @game.id,
+        is_black: false
       )
-      expect { piece1.capture_piece(0, 1) }.to raise_error(RuntimeError)
-      piece2.reload # fetch it from the DB again
-      expect(piece2.captured?).to eq(false)
+      piece1.capture_piece(0, 1)
+      piece2.reload
+      expect(piece2.is_captured).to be_falsey
     end
   end
 end
