@@ -36,9 +36,8 @@ class Game < ApplicationRecord
     end
   end
 
-  # This locates an individual piece for use in the capture method
   def piece_at(row, col)
-    pieces.where(row: row, col: col, is_captured: false).first
+    pieces.where(row: row, col: col).first
   end
 
   def populate_board

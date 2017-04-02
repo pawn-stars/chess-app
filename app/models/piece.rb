@@ -3,9 +3,8 @@ class Piece < ApplicationRecord
   belongs_to :game
   has_many :moves
 
-  scope :are_captured, -> { where(is_captured: true) }
-  scope :are_not_captured, -> { where(is_captured: false) }
-  scope :piece_at, ->(row, col) { where(row: row, col: col) }
+  scope :are_captured, -> { where(row: -1, col: -1) }
+  scope :are_not_captured, -> { where("row > ? AND col > ?", -1, -1) }
 
   def self.types
     %w(Pawn Rook Knight Bishop Queen King)
@@ -18,7 +17,6 @@ class Piece < ApplicationRecord
 
   def move_to!(to_row, to_col)
     return unless valid_move?(to_row, to_col)
-
     from_row = row
     from_col = col
     update_attributes(row: to_row, col: to_col)
@@ -29,15 +27,12 @@ class Piece < ApplicationRecord
     (enemy = enemy_at(row, col)) ? enemy.captured! : false
   end
 
-  #   other_piece = game.piece_at(row, col)
-  #   raise 'You cannot capture your own piece' if other_piece && other_piece.user == user
-  #   other_piece.captured!
-  #   return true if other_piece && other_piece.user != user
-  # end
-
-  # This updates a piece to captured
   def captured!
-    update(is_captured: true)
+    update(row: -1, col: -1)
+  end
+
+  def captured?
+    row < 0 && col < 0
   end
 
   private
@@ -91,7 +86,7 @@ class Piece < ApplicationRecord
   end
 
   def enemy_at(check_row, check_col)
-    enemy = game.pieces.are_not_captured.piece_at(check_row, check_col).first
+    enemy = game.piece_at(check_row, check_col)
     enemy if enemy && enemy.is_black != is_black
   end
 end
