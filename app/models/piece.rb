@@ -10,7 +10,7 @@ class Piece < ApplicationRecord
     %w(Pawn Rook Knight Bishop Queen King)
   end
 
-  # Adds an STI type property to the JSON data, rails doesn't do this be default
+  # Adds an STI type property to the JSON data, rails doesn't do this by default
   def serializable_hash(options = nil)
     super.merge("type" => type)
   end
@@ -71,9 +71,30 @@ class Piece < ApplicationRecord
     end
   end
 
+  def move_obstructed?(to_row, to_col)
+    Rails.logger.debug "***** Move_obstructed from #{row},#{col} to #{to_row},#{to_col}"
+    if type == "Knight"
+      Rails.logger.debug "KNIGHT. cannot obstruct move"
+      false
+    end
 
+    obstruction_array = []
+    if row == to_row
+      obstruction_array = move_obstructed_horizontal(to_col)
+    elsif col == to_col
+      obstruction_array = move_obstructed_vertical(to_row)
+    elsif (row - to_row).abs == (col - to_col).abs
+      obstruction_array = move_obstructed_diagonal(to_row, to_col)
+    end
 
-  def move_obstructed?(_to_row, _to_col)
+    Rails.logger.debug "Obstruction array contains #{obstruction_array.size} elements"
+    return false if obstruction_array.empty?
+    obstruction_array.each do |square|
+      if game.piece_at(square[0], square[1])
+        Rails.logger.debug "OBSTRUCTION at #{square[0]}, #{square[1]}"
+      end
+      return true if game.piece_at(square[0], square[1])
+    end
     false
   end
 
@@ -91,5 +112,44 @@ class Piece < ApplicationRecord
   def enemy_at(check_row, check_col)
     enemy = game.piece_at(check_row, check_col)
     enemy if enemy && enemy.is_black != is_black
+
+  def move_obstructed_horizontal(to_col)
+    obstruction_array = []
+    col_direction = to_col > col ? 1 : -1
+    current_col = col + col_direction
+    while (to_col - current_col).abs > 0
+      obstruction_array << [row, current_col]
+      current_col += col_direction
+    end
+    Rails.logger.debug "Horizonal Move. Inspect #{obstruction_array.size} squares"
+    obstruction_array
   end
+
+  def move_obstructed_vertical(to_row)
+    obstruction_array = []
+    row_direction = to_row > row ? 1 : -1
+    current_row = row + row_direction
+    while (to_row - current_row).abs > 0
+      obstruction_array << [current_row, col]
+      current_row += row_direction
+    end
+    Rails.logger.debug "Vertical Move. Inspect #{obstruction_array.size} squares"
+    obstruction_array
+  end
+
+  def move_obstructed_diagonal(to_row, to_col)
+    obstruction_array = []
+    col_direction = to_col > col ? 1 : -1
+    row_direction = to_row > row ? 1 : -1
+    current_col = col + col_direction
+    current_row = row + row_direction
+    while (to_row - current_row).abs > 0 && (to_col - current_col).abs > 0
+      obstruction_array << [current_row, current_col]
+      current_col += col_direction
+      current_row += row_direction
+    end
+    Rails.logger.debug "Diagonal Move. Inspect #{obstruction_array.size} squares"
+    obstruction_array
+  end
+
 end
