@@ -28,7 +28,7 @@ RSpec.describe Piece, type: :model do
 
     it "should update row and col attributes" do
       piece = @game.pieces.create(
-        row: 0, col: 0, is_captured: false, user: @user
+        row: 0, col: 0, user: @user
       )
       piece.move_to!(7, 7)
 
@@ -38,7 +38,7 @@ RSpec.describe Piece, type: :model do
 
     it "should create a new move" do
       piece = @game.pieces.create(
-        row: 0, col: 0, is_captured: false, user: @user
+        row: 0, col: 0, user: @user
       )
       piece.move_to!(7, 7)
       move = piece.moves.last
@@ -56,14 +56,14 @@ RSpec.describe Piece, type: :model do
     describe "#move_nil?" do
       it "tests private method move_nil? with a nil move" do
         piece = @game.pieces.create(
-          row: FROM_ROW, col: FROM_COL, is_captured: false, user: @user
+          row: FROM_ROW, col: FROM_COL, user: @user
         )
         expect(piece.send(:move_nil?, FROM_ROW, FROM_COL)).to be true
       end
 
       it "tests private method move_nil? with a non-nil move" do
         piece = @game.pieces.create(
-          row: FROM_ROW, col: FROM_COL, is_captured: false, user: @user
+          row: FROM_ROW, col: FROM_COL, user: @user
         )
         expect(piece.send(:move_nil?, 7, 7)).to be false
       end
@@ -72,14 +72,14 @@ RSpec.describe Piece, type: :model do
     describe "#move_out_bounds?" do
       it "tests private method move_out_of_bounds? with an off-board move" do
         piece = @game.pieces.create(
-          row: FROM_ROW, col: FROM_COL, is_captured: false, user: @user
+          row: FROM_ROW, col: FROM_COL, user: @user
         )
         expect(piece.send(:move_out_of_bounds?, FROM_ROW, 8)).to be true
       end
 
       it "tests private method move_out_of_bounds? with an on-board move" do
         piece = @game.pieces.create(
-          row: FROM_ROW, col: FROM_COL, is_captured: false, user: @user
+          row: FROM_ROW, col: FROM_COL, user: @user
         )
         expect(piece.send(:move_out_of_bounds?, FROM_ROW + 1, FROM_COL + 1)).to be false
       end
@@ -88,14 +88,14 @@ RSpec.describe Piece, type: :model do
     describe "#valid_move?" do
       it "tests private method valid_move? with a nil move" do
         piece = @game.pieces.create(
-          row: FROM_ROW, col: FROM_COL, is_captured: false, user: @user
+          row: FROM_ROW, col: FROM_COL, user: @user
         )
         expect(piece.send(:valid_move?, FROM_ROW, FROM_COL)).to be false
       end
 
       it "tests private method valid_move? with an out of bounds move" do
         piece = @game.pieces.create(
-          row: FROM_ROW, col: FROM_COL, is_captured: false, user: @user
+          row: FROM_ROW, col: FROM_COL, user: @user
         )
         expect(piece.send(:valid_move?, FROM_ROW, 8)).to be false
       end
@@ -106,7 +106,7 @@ RSpec.describe Piece, type: :model do
     it "should not move the piece out of bounds" do
       to_col = 8
       piece = @game.pieces.create(
-        row: FROM_ROW, col: FROM_COL, is_captured: false, user: @user
+        row: FROM_ROW, col: FROM_COL, user: @user
       )
       piece.move_to!(FROM_ROW, to_col)
       expect(piece.row).to eq(FROM_ROW)
@@ -117,7 +117,7 @@ RSpec.describe Piece, type: :model do
     describe "#move_legal?" do
       it "should not move the piece due to illegal move" do
         piece = @game.pieces.create(
-          row: FROM_ROW, col: FROM_COL, is_captured: false, user: @user
+          row: FROM_ROW, col: FROM_COL, user: @user
         )
         piece.move_to!(FROM_ROW + 2, FROM_COL + 1)
         expect(piece.row).to eq(FROM_ROW)
@@ -127,7 +127,7 @@ RSpec.describe Piece, type: :model do
       it "should move the piece: horizonal move" do
         to_col = 7
         piece = @game.pieces.create(
-          row: FROM_ROW, col: FROM_COL, is_captured: false, user: @user
+          row: FROM_ROW, col: FROM_COL, user: @user
         )
         piece.move_to!(FROM_ROW, to_col)
         expect(piece.row).to eq(FROM_ROW)
@@ -137,7 +137,7 @@ RSpec.describe Piece, type: :model do
       it "should move the piece: vertical move" do
         to_row = 7
         piece = @game.pieces.create(
-          row: FROM_ROW, col: FROM_COL, is_captured: false, user: @user
+          row: FROM_ROW, col: FROM_COL, user: @user
         )
         piece.move_to!(to_row, FROM_COL)
         expect(piece.row).to eq(to_row)
@@ -148,7 +148,7 @@ RSpec.describe Piece, type: :model do
         to_row = 6
         to_col = 5
         piece = @game.pieces.create(
-          row: FROM_ROW, col: FROM_COL, is_captured: false, user: @user
+          row: FROM_ROW, col: FROM_COL, user: @user
         )
         piece.move_to!(to_row, to_col)
         expect(piece.row).to eq(to_row)
@@ -187,13 +187,12 @@ RSpec.describe Piece, type: :model do
       piece2 = @black.pieces.create(
         row: 0,
         col: 1,
-        is_captured: false,
         game_id: @game.id,
         is_black: true
       )
       expect(piece1.capture_piece(0, 1)).to be_truthy
       piece2.reload
-      expect(piece2.is_captured).to be_truthy
+      expect(piece2.captured?).to be_truthy
     end
 
     it "should not capture a player's own piece" do
@@ -201,13 +200,12 @@ RSpec.describe Piece, type: :model do
       piece2 = @white.pieces.create(
         row: 0,
         col: 1,
-        is_captured: false,
         game_id: @game.id,
         is_black: false
       )
       piece1.capture_piece(0, 1)
       piece2.reload
-      expect(piece2.is_captured).to be_falsey
+      expect(piece2.captured?).to be_falsey
     end
   end
 end
