@@ -20,7 +20,7 @@ class Piece < ApplicationRecord
     from_row = row
     from_col = col
     update_attributes(row: to_row, col: to_col)
-    create_move!(from_row, from_col)
+    # create_move!(from_row, from_col)
   end
 
   def capture_piece(row, col)
@@ -40,8 +40,8 @@ class Piece < ApplicationRecord
   def valid_move?(to_row, to_col)
     return false if move_nil?(to_row, to_col)
     return false if move_out_of_bounds?(to_row, to_col)
+    return false if move_destination_ally?(to_row, to_col)
     return false unless move_legal?(to_row, to_col)
-    return false if move_destination_obstructed?(to_row, to_col)
     return false if move_obstructed?(to_row, to_col)
     true
   end
@@ -52,6 +52,11 @@ class Piece < ApplicationRecord
 
   def move_out_of_bounds?(to_row, to_col)
     to_row < 0 || to_row > 7 || to_col < 0 || to_col > 7
+  end
+
+  def move_destination_ally?(to_row, to_col)
+    Rails.logger.debug "MOVE DESTINATION ALLY at #{to_row},#{to_col}"
+    return true
   end
 
   def move_legal?(to_row, to_col)
@@ -66,9 +71,7 @@ class Piece < ApplicationRecord
     end
   end
 
-  def move_destination_obstructed?(_to_row, _to_col)
-    false
-  end
+
 
   def move_obstructed?(_to_row, _to_col)
     false
