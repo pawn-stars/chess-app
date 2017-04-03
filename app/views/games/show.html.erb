@@ -13,7 +13,7 @@
 </div>
 
 <script>
-  const whitePieceHtml = {
+  var whitePieceHtml = {
     King: '&#9812;',
     Queen: '&#9813;',
     Rook: '&#9814;',
@@ -21,7 +21,7 @@
     Knight: '&#9816;',
     Pawn: '&#9817;'
   };
-  const blackPieceHtml = {
+  var blackPieceHtml = {
     King: '&#9818;',
     Queen: '&#9819;',
     Rook: '&#9820;',
@@ -29,21 +29,20 @@
     Knight: '&#9822;',
     Pawn: '&#9823;'
   };
+  var piecesURL = $('.chessboard').data('pieces-url');
 
   $(function() {
 
-    setupBoard();
+    $.get(piecesURL).success(function(pieces) {
+      updateBoard(pieces);
+    });
 
-    function setupBoard() {
+    function updateBoard(pieces) {
       $('.piece').remove();
-      var piecesURL = $('.chessboard').data('pieces-url');
-
-      $.get(piecesURL).success(function(pieces) {
-        pieces.forEach(function(piece, i){
-          if (piece.row > -1 && piece.col > -1) {
-            placePiece(piece);
-          }
-        });
+      pieces.forEach(function(piece, i) {
+        if (piece.row > -1 && piece.col > -1) {
+          placePiece(piece);
+        }
       });
 
       function placePiece(piece) {
@@ -54,10 +53,8 @@
         } else {
           pieceHtml = whitePieceHtml[piece.type];
         }
-
         var piece = $.parseHTML(
           '<div class="piece" data-id='+ piece.id +'>' + pieceHtml + '</div>');
-
         $('.square#'+squareId).append(piece);
         $('.piece').draggable();
       }
@@ -71,20 +68,16 @@
       }
     });
 
-    // race condition without setTimeout():
-    // The get request may complete before the post request's back-end logic is
-    //   completely executed.
-    // In the worst case, the get request will retrieve pieces before they are
-    //   updated by Piece#move_to!.
     function movePiece(piece, coord) {
-      var piecesURL = $('.chessboard').data('pieces-url');
       var newRow = coord[0];
       var newCol = coord[1];
 
       $.post(piecesURL + "/" + piece.data("id"), {
         _method: "PUT",
         piece: { row: newRow, col: newCol }
-      }).success(setTimeout(setupBoard, 10));
+      }).success(function(pieces) {
+        updateBoard(pieces);
+      });
     }
   });
 </script>
