@@ -13,7 +13,7 @@
 </div>
 
 <script>
-  var whitePieceHtml = {
+  const whitePieceHtml = {
     King: '&#9812;',
     Queen: '&#9813;',
     Rook: '&#9814;',
@@ -21,7 +21,7 @@
     Knight: '&#9816;',
     Pawn: '&#9817;'
   };
-  var blackPieceHtml = {
+  const blackPieceHtml = {
     King: '&#9818;',
     Queen: '&#9819;',
     Rook: '&#9820;',
@@ -31,27 +31,19 @@
   };
 
   $(function() {
-    $('.chessboard').each(function() {
-      var $chessboard = $(this);
-      var piecesURL = $chessboard.data('pieces-url');
 
-      // populates boards with pieces
+    setupBoard();
+
+    function setupBoard() {
+      $('.piece').remove();
+      var piecesURL = $('.chessboard').data('pieces-url');
+
       $.get(piecesURL).success(function(pieces) {
         pieces.forEach(function(piece, i){
-          if (!piece.is_captured) {
+          if (piece.row > -1 && piece.col > -1) {
             placePiece(piece);
           }
         });
-      });
-
-      $(".square").droppable({
-        // if (moveIsInvalid) $( "#draggable" ).draggable({ revert: "valid" });
-        drop: function(event, ui) {
-          var piece = $(ui.draggable);
-          $(this).append(piece);
-          piece.css({left: 0, top: 0});
-          movePiece(piece);
-        }
       });
 
       function placePiece(piece) {
@@ -66,20 +58,33 @@
         var piece = $.parseHTML(
           '<div class="piece" data-id='+ piece.id +'>' + pieceHtml + '</div>');
 
-        $chessboard.find('.square#'+squareId).append(piece);
-        $chessboard.find('.piece').draggable();
+        $('.square#'+squareId).append(piece);
+        $('.piece').draggable();
       }
+    }
 
-      function movePiece(piece) {
-        var coord = piece.closest('.square').attr('id');
-        var newRow = coord[0];
-        var newCol = coord[1];
-
-        $.post(piecesURL + "/" + piece.data("id"), {
-          _method: "PUT",
-          piece: { row: newRow, col: newCol }
-        }).success();
+    $(".square").droppable({
+      drop: function(event, ui) {
+        var coord = $(this).attr('id').split('');
+        var $piece = $(ui.draggable);
+        movePiece($piece, coord);
       }
     });
+
+    // race condition without setTimeout():
+    // The get request may complete before the post request's back-end logic is
+    //   completely executed.
+    // In the worst case, the get request will retrieve pieces before they are
+    //   updated by Piece#move_to!.
+    function movePiece(piece, coord) {
+      var piecesURL = $('.chessboard').data('pieces-url');
+      var newRow = coord[0];
+      var newCol = coord[1];
+
+      $.post(piecesURL + "/" + piece.data("id"), {
+        _method: "PUT",
+        piece: { row: newRow, col: newCol }
+      }).success(setTimeout(setupBoard, 10));
+    }
   });
 </script>

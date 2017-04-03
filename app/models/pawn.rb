@@ -3,7 +3,7 @@ class Pawn < Piece
     return true if single_advance?(to_row, to_col)
     return true if double_advance?(to_row, to_col)
     return true if capture_move?(to_row, to_col)
-    return true if en_passant?(to_row, to_col) # need to send signal to capture logic for en passant
+    return true if en_passant?(to_row, to_col)
     false
   end
 
