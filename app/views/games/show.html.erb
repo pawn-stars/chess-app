@@ -29,28 +29,19 @@
     Knight: '&#9822;',
     Pawn: '&#9823;'
   };
+  var piecesURL = $('.chessboard').data('pieces-url');
 
   $(function() {
-    $('.chessboard').each(function() {
-      var $chessboard = $(this);
-      var piecesURL = $chessboard.data('pieces-url');
 
-      // populates boards with pieces
-      $.get(piecesURL).success(function(pieces) {
-        pieces.forEach(function(piece, i){
-          if (!piece.is_captured) {
-            placePiece(piece);
-          }
-        });
-      });
+    $.get(piecesURL).success(function(pieces) {
+      updateBoard(pieces);
+    });
 
-      $(".square").droppable({
-        // if (moveIsInvalid) $( "#draggable" ).draggable({ revert: "valid" });
-        drop: function(event, ui) {
-          var piece = $(ui.draggable);
-          $(this).append(piece);
-          piece.css({left: 0, top: 0});
-          movePiece(piece);
+    function updateBoard(pieces) {
+      $('.piece').remove();
+      pieces.forEach(function(piece, i) {
+        if (piece.row > -1 && piece.col > -1) {
+          placePiece(piece);
         }
       });
 
@@ -62,24 +53,31 @@
         } else {
           pieceHtml = whitePieceHtml[piece.type];
         }
-
         var piece = $.parseHTML(
           '<div class="piece" data-id='+ piece.id +'>' + pieceHtml + '</div>');
-
-        $chessboard.find('.square#'+squareId).append(piece);
-        $chessboard.find('.piece').draggable();
+        $('.square#'+squareId).append(piece);
+        $('.piece').draggable();
       }
+    }
 
-      function movePiece(piece) {
-        var coord = piece.closest('.square').attr('id');
-        var newRow = coord[0];
-        var newCol = coord[1];
-
-        $.post(piecesURL + "/" + piece.data("id"), {
-          _method: "PUT",
-          piece: { row: newRow, col: newCol }
-        }).success();
+    $(".square").droppable({
+      drop: function(event, ui) {
+        var coord = $(this).attr('id').split('');
+        var $piece = $(ui.draggable);
+        movePiece($piece, coord);
       }
     });
+
+    function movePiece(piece, coord) {
+      var newRow = coord[0];
+      var newCol = coord[1];
+
+      $.post(piecesURL + "/" + piece.data("id"), {
+        _method: "PUT",
+        piece: { row: newRow, col: newCol }
+      }).success(function(pieces) {
+        updateBoard(pieces);
+      });
+    }
   });
 </script>

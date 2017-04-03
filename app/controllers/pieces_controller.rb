@@ -6,10 +6,8 @@ class PiecesController < ApplicationController
 
   def update
     piece = Piece.find(params[:id])
-
     piece.move_to!(piece_params[:row].to_i, piece_params[:col].to_i)
-
-    render json: piece
+    render json: piece.game.pieces
   end
 
   private
