@@ -18,8 +18,4 @@ class Queen < Piece
       return true
     end
   end
-
-  def display_piece
-    black? ? "&#9819;" : "&#9813;"
-  end
 end
