@@ -16,9 +16,6 @@ class Piece < ApplicationRecord
   end
 
   def move_to!(to_row, to_col)
-    logger.debug "piece model. move_to! destination: #{to_row},#{to_col}"
-
-    logger.debug "before call to valid_move?"
     return false unless valid_move?(to_row, to_col)
 
     capture_piece(to_row, to_col)
@@ -45,7 +42,6 @@ class Piece < ApplicationRecord
   private
 
   def valid_move?(to_row, to_col)
-    logger.debug "inside valid_move"
     return false if move_nil?(to_row, to_col)
     return false if move_out_of_bounds?(to_row, to_col)
     return false if move_destination_ally?(to_row, to_col)
