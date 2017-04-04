@@ -7,7 +7,6 @@ class PiecesController < ApplicationController
   def update
     piece = Piece.find(params[:id])
 
-    Rails.logger.debug "CONTROLLER UPDATE. BEFORE CALL move_to"
     piece.move_to!(piece_params[:row].to_i, piece_params[:col].to_i)
 
     render json: piece
