@@ -17,13 +17,12 @@ class Piece < ApplicationRecord
 
   def move_to!(to_row, to_col)
     return false unless valid_move?(to_row, to_col)
-
+    # en passant capture won't work if the line below executes after updating coords
     capture_piece(to_row, to_col)
 
     from_row = row
     from_col = col
     update_attributes(row: to_row, col: to_col)
-
     create_move!(from_row, from_col)
   end
 
