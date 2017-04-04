@@ -46,7 +46,7 @@ class Piece < ApplicationRecord
     return false if move_out_of_bounds?(to_row, to_col)
     return false if move_destination_ally?(to_row, to_col)
     return false unless move_legal?(to_row, to_col)
-    return false if move_obstructed?(to_row, to_col) && type != 'Knight'
+    return false if move_obstructed?(to_row, to_col)
     true
   end
 
