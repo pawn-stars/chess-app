@@ -32,6 +32,19 @@ class GamesController < ApplicationController
     end
   end
 
+  def forfeit
+    @game = Game.find(params[:id])
+      if current_user.id == @game.white_player_id
+        @game.update_attributes(winner: @game.black_player_id)
+      end
+
+      if current_user.id == @game.black_player_id
+        @game.update_attributes(winner: @game.white_player_id)
+      end
+
+      redirect_to root_path
+  end
+
   private
 
   def game_params
