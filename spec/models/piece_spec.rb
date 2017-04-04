@@ -8,14 +8,15 @@ RSpec.describe Piece, type: :model do
   end
 
   describe "#move_to!" do
+    @user = User.create(
+      email: 'foobar@foobar.com',
+      screen_name: 'foobar',
+      password: 'foobar',
+      password_confirmation: 'foobar'
+    )
+    @game = @user.games.create(white_player_id: @user.id)
+
     before(:all) do
-      @user = User.create(
-        email: 'foobar@foobar.com',
-        screen_name: 'foobar',
-        password: 'foobar',
-        password_confirmation: 'foobar'
-      )
-      @game = @user.games.create(white_player_id: @user.id)
       FROM_ROW = 3
       FROM_COL = 2
       MOVE_ROW = 6
