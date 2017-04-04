@@ -16,17 +16,14 @@ class Piece < ApplicationRecord
   end
 
   def move_to!(to_row, to_col)
-    Rails.logger.debug "MOVE TO MOVE TO MOVE TO MOVE TO "
+    logger.debug "piece model. move_to. destination: #{to_row},#{to_col}"
 
-    if valid_move?(to_row, to_col)
-      logger.debug "VALID MOVE returned true"
-    else
-      logger.debug "VALID MOVE returned false"
-    end
+    logger.debug "before call to valid_move?"
+    return unless valid_move?(to_row, to_col)
 
     # from_row = row
     # from_col = col
-    update_attributes(row: to_row, col: to_col)
+    # update_attributes(row: to_row, col: to_col)
 
     # create_move!(from_row, from_col)
   end
@@ -46,7 +43,7 @@ class Piece < ApplicationRecord
   private
 
   def valid_move?(to_row, to_col)
-    Rails.logger.debug "VALID MOVE updated code"
+    logger.debug "inside valid_move"
     return false if move_nil?(to_row, to_col)
     return false if move_out_of_bounds?(to_row, to_col)
     return false if move_destination_ally?(to_row, to_col)
@@ -66,8 +63,7 @@ class Piece < ApplicationRecord
   end
 
   def move_destination_ally?(to_row, to_col)
-    Rails.logger.debug "DESTINATION ALLY"
-    ally_at(to_row, to_col)
+    true
   end
 
   def move_legal?(to_row, to_col)
@@ -91,7 +87,7 @@ class Piece < ApplicationRecord
     current_col = col + col_direction
 
     # continue until square before destination. NOT looking at the destination square
-    until current_row == to_row - row_direction && current_col == to_col - col_direction
+    until current_row == to_row && current_col == to_col
       return true if game.piece_at(current_row, current_col)
       current_row += row_direction
       current_col += col_direction
@@ -116,7 +112,9 @@ class Piece < ApplicationRecord
   end
 
   def ally_at(check_row, check_col)
-    ally = game.piece_at(check_row, check_col)
-    ally if ally && ally.is_black == is_black
+    logger.debug "method ally_at"
+     ally = game.piece_at(check_row, check_col)
+     return true if ally && ally.is_black == is_black
+     false
   end
 end
