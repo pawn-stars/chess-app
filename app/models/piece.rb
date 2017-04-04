@@ -16,14 +16,16 @@ class Piece < ApplicationRecord
   end
 
   def move_to!(to_row, to_col)
-    logger.debug "piece model. move_to. destination: #{to_row},#{to_col}"
+    logger.debug "piece model. move_to. did it change? destination: #{to_row},#{to_col}"
 
     logger.debug "before call to valid_move?"
-    return unless valid_move?(to_row, to_col)
+    return false unless valid_move?(to_row, to_col)
+
+    capture_piece(to_row, to_col)
 
     # from_row = row
     # from_col = col
-    # update_attributes(row: to_row, col: to_col)
+    update_attributes(row: to_row, col: to_col)
 
     # create_move!(from_row, from_col)
   end
@@ -63,7 +65,9 @@ class Piece < ApplicationRecord
   end
 
   def move_destination_ally?(to_row, to_col)
-    true
+    # puts ally_at(to_row, to_col).inspect
+    !!ally_at(to_row, to_col)   # will convert to true if returns object, false if returns false
+
   end
 
   def move_legal?(to_row, to_col)
@@ -112,9 +116,8 @@ class Piece < ApplicationRecord
   end
 
   def ally_at(check_row, check_col)
-    logger.debug "method ally_at"
-     ally = game.piece_at(check_row, check_col)
-     return true if ally && ally.is_black == is_black
-     false
+    ally = game.piece_at(check_row, check_col)
+    puts ally.inspect
+    ally if ally && ally.is_black == is_black
   end
 end
