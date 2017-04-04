@@ -24,6 +24,7 @@ class Piece < ApplicationRecord
     from_col = col
     update_attributes(row: to_row, col: to_col)
     create_move!(from_row, from_col)
+    true
   end
 
   def capture_piece(row, col)
