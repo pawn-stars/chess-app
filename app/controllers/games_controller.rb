@@ -27,6 +27,7 @@ class GamesController < ApplicationController
     if @game.valid?
       current_user.games << game
       redirect_to @game
+      @game.populate_board if @game.pieces.empty?
     else
       render :index, text: "Not Allowed"
     end

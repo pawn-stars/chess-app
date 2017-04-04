@@ -63,4 +63,12 @@ RSpec.describe Game, type: :model do
       end
     end
   end
+
+ describe "#populate_board" do
+    it "should populate board only if both black and white player ids are present" do
+      game = Game.create(white_player_id: 0, black_player_id: 1)
+      game.populate_board
+      expect(game.pieces.count).to eq(32)
+    end
+  end
 end

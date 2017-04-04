@@ -43,7 +43,7 @@ class Game < ApplicationRecord
   def populate_board
     # White pieces
     Rook.create(game_id: id, user_id: white_player_id, row: 0, col: 0, is_black: false)
-    Knight.create(game_id: id, user_: white_player_id, row: 0, col: 1, is_black: false)
+    Knight.create(game_id: id, user_id: white_player_id, row: 0, col: 1, is_black: false)
     Bishop.create(game_id: id, user_id: white_player_id, row: 0, col: 2, is_black: false)
     Queen.create(game_id: id, user_id: white_player_id, row: 0, col: 3, is_black: false)
     King.create(game_id: id, user_id: white_player_id, row: 0, col: 4, is_black: false)
