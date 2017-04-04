@@ -1,3 +1,5 @@
+# rubocop:disable Metrics/AbcSize
+
 class GamesController < ApplicationController
   def index
     @games = Game.available
@@ -26,8 +28,8 @@ class GamesController < ApplicationController
     @game.update_attributes(game_params)
     if @game.valid?
       current_user.games << game
-      redirect_to @game
       @game.populate_board if @game.pieces.empty?
+      redirect_to @game
     else
       render :index, text: "Not Allowed"
     end

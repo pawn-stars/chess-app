@@ -24,6 +24,26 @@ RSpec.describe Game, type: :model do
     end
   end
 
+  describe "#populate_board" do
+    it "should populate board only if both black and white player ids are present" do
+      white = User.create(
+        email: 'white@foobar.com',
+        screen_name: 'white',
+        password: 'foobar',
+        password_confirmation: 'foobar'
+      )
+      black = User.create(
+        email: 'black@foobar.com',
+        screen_name: 'black',
+        password: 'foobar',
+        password_confirmation: 'foobar'
+      )
+      game = Game.create(white_player_id: white.id, black_player_id: black.id)
+      game.populate_board
+      expect(game.pieces.count).to eq(32)
+    end
+  end
+
   context "Board" do
     before(:all) do
       @user = User.create(
@@ -61,14 +81,6 @@ RSpec.describe Game, type: :model do
 
         expect { Game::Board.new(@game.pieces) }.to raise_error(RuntimeError)
       end
-    end
-  end
-
- describe "#populate_board" do
-    it "should populate board only if both black and white player ids are present" do
-      game = Game.create(white_player_id: 0, black_player_id: 1)
-      game.populate_board
-      expect(game.pieces.count).to eq(32)
     end
   end
 end
