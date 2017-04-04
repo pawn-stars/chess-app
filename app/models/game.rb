@@ -13,37 +13,10 @@ class Game < ApplicationRecord
           (white_player_id IS NOT NULL AND black_player_id IS NULL)')
         }
 
-  class Board
-    attr_reader :grid
-
-    def initialize(pieces)
-      @pieces = pieces.are_not_captured
-      @grid = Array.new(8) { Array.new(8) }
-      fill_grid
-    end
-
-    private
-
-    attr_reader :pieces
-
-    def fill_grid
-      pieces.each do |piece|
-        if grid[piece.row][piece.col]
-          raise "uncaptured pieces occupy same square"
-        end
-        grid[piece.row][piece.col] = piece
-      end
-    end
-  end
-
-  def piece_at(row, col)
-    pieces.where(row: row, col: col).first
-  end
-
   def populate_board
     # White pieces
     Rook.create(game_id: id, user_id: white_player_id, row: 0, col: 0, is_black: false)
-    Knight.create(game_id: id, user_: white_player_id, row: 0, col: 1, is_black: false)
+    Knight.create(game_id: id, user_id: white_player_id, row: 0, col: 1, is_black: false)
     Bishop.create(game_id: id, user_id: white_player_id, row: 0, col: 2, is_black: false)
     Queen.create(game_id: id, user_id: white_player_id, row: 0, col: 3, is_black: false)
     King.create(game_id: id, user_id: white_player_id, row: 0, col: 4, is_black: false)
@@ -74,5 +47,32 @@ class Game < ApplicationRecord
     Bishop.create(game_id: id, user_id: black_player_id, row: 7, col: 5, is_black: true)
     Knight.create(game_id: id, user_id: black_player_id, row: 7, col: 6, is_black: true)
     Rook.create(game_id: id, user_id: black_player_id, row: 7, col: 7, is_black: true)
+  end
+
+  class Board
+    attr_reader :grid
+
+    def initialize(pieces)
+      @pieces = pieces.are_not_captured
+      @grid = Array.new(8) { Array.new(8) }
+      fill_grid
+    end
+
+    private
+
+    attr_reader :pieces
+
+    def fill_grid
+      pieces.each do |piece|
+        if grid[piece.row][piece.col]
+          raise "uncaptured pieces occupy same square"
+        end
+        grid[piece.row][piece.col] = piece
+      end
+    end
+  end
+
+  def piece_at(row, col)
+    pieces.where(row: row, col: col).first
   end
 end
