@@ -45,6 +45,10 @@ class Piece < ApplicationRecord
     return false if move_nil?(to_row, to_col)
     return false if move_out_of_bounds?(to_row, to_col)
     return false if move_destination_ally?(to_row, to_col)
+
+    # until have Knight::move_legal?
+    return true if type == "Knight"
+
     return false unless move_legal?(to_row, to_col)
     return false if move_obstructed?(to_row, to_col)
     true
@@ -68,22 +72,16 @@ class Piece < ApplicationRecord
     # fail NotImplementedError 'Piece sub-class must implement #legal_move?'
     # Will remove comment and following code once all sub-classes are complete.
 
-    if type == "Knight"
-      true
-    else
-      row == to_row || col == to_col || (row - to_row).abs == (col - to_col).abs
-    end
+    row == to_row || col == to_col || (row - to_row).abs == (col - to_col).abs
   end
 
   def move_obstructed?(to_row, to_col)
     row_direction = to_row <=> row
     col_direction = to_col <=> col
 
-    # move one square off the current piece's square.
     current_row = row + row_direction
     current_col = col + col_direction
 
-    # continue until square before destination. NOT looking at the destination square
     until current_row == to_row && current_col == to_col
       return true if game.piece_at(current_row, current_col)
       current_row += row_direction
