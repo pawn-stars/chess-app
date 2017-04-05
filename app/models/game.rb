@@ -50,7 +50,7 @@ class Game < ApplicationRecord
   end
 
   def blacks_turn?
-    !moves.last.piece.is_black
+    !moves.empty && !moves.last.piece.is_black
   end
 
   class Board
