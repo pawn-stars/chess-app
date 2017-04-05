@@ -66,7 +66,7 @@ RSpec.describe Piece, type: :model do
 
     # MeO tests supporting move_to! - test private valid_move? and its called methods
     # rubocop:disable UselessAssignment
-    describe "tests private valid_move?" do
+    describe "#valid_move?" do
       it "with a nil move" do
         piece = @game.pieces.create(row: FROM_ROW, col: FROM_COL, is_black: true, user: @black)
         expect(piece.send(:valid_move?, FROM_ROW, FROM_COL)).to be false
@@ -89,7 +89,7 @@ RSpec.describe Piece, type: :model do
       end
     end
 
-    describe "tests private move_nil?" do
+    describe "#move_nil?" do
       it "with a nil move" do
         piece = @game.pieces.create(row: FROM_ROW, col: FROM_COL, is_black: true, user: @black)
         expect(piece.send(:move_nil?, FROM_ROW, FROM_COL)).to be true
@@ -100,7 +100,7 @@ RSpec.describe Piece, type: :model do
       end
     end
 
-    describe "tests private move_out_bounds?" do
+    describe "#move_out_bounds?" do
       it "with an off-board move" do
         piece = @game.pieces.create(row: FROM_ROW, col: FROM_COL, is_black: true, user: @black)
         expect(piece.send(:move_out_of_bounds?, FROM_ROW, 8)).to be true
@@ -111,7 +111,7 @@ RSpec.describe Piece, type: :model do
       end
     end
 
-    describe "tests private move_destination_ally?" do
+    describe "#move_destination_ally?" do
       it "with an empty destination" do
         piece = @game.pieces.create(row: MOVE_ROW, col: MOVE_COL, is_black: true, user: @black)
         expect(piece.send(:move_destination_ally?, MOVE_ROW - 4, MOVE_COL)).to be false
@@ -132,7 +132,7 @@ RSpec.describe Piece, type: :model do
       end
     end
 
-    describe "tests private move_obstructed?" do
+    describe "#move_obstructed?" do
       it "with horizontal move and no obstruction" do
         piece = @game.pieces.create(row: MOVE_ROW, col: MOVE_COL, is_black: true, user: @black)
         expect(piece.send(:move_obstructed?, MOVE_ROW - 4, MOVE_COL)).to be false
@@ -170,6 +170,51 @@ RSpec.describe Piece, type: :model do
       end
     end
   end
+
+  describe "undo_move!" do
+    before(:all) do
+      @white = User.create(
+        email: 'white@foobar.com',
+        screen_name: 'white',
+        password: 'foobar',
+        password_confirmation: 'foobar'
+      )
+      @black = User.create(
+        email: 'black@foobar.com',
+        screen_name: 'black',
+        password: 'foobar',
+        password_confirmation: 'foobar'
+      )
+      @game = @white.games.create(
+        white_player_id: @white.id,
+        black_player_id: @black.id
+      )
+      @black.games << @game
+      @white_king = @white.pieces.create(
+        type: 'King', row: 0, col: 0, game_id: @game.id, is_black: false
+      )
+      @black_king = @black.pieces.create(
+        type: 'King', row: 7, col: 7, game_id: @game.id, is_black: true
+      )
+    end
+
+    after(:all) do
+      DatabaseCleaner.clean_with(:deletion)
+    end
+
+    it "should undo a normal move" do
+      pawn = @white.pieces.create(
+        type: 'Pawn', row: 1, col: 1, game_id: @game.id, is_black: false
+      )
+      pawn.move_to!(2, 1)
+      expect(pawn.moves.length).to eq(1)
+      pawn.undo_move!
+      expect(pawn.row).to eq(1)
+      expect(pawn.col).to eq(1)
+      expect(pawn.moves.length).to eq(0)
+    end
+  end
+
 
   describe "#capture_piece" do
     before(:all) do

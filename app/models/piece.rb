@@ -19,22 +19,46 @@ class Piece < ApplicationRecord
 
   def move_to!(to_row, to_col)
     return false unless valid_move?(to_row, to_col)
-    # en passant capture won't work if the line below executes after updating coords
-    capture_piece(to_row, to_col)
+    captured_id = capture_piece(to_row, to_col)
+    move_type = 'normal'
+    move_type = "capture #{captured_id}" if captured_id
 
     from_row = row
     from_col = col
     update_attributes(row: to_row, col: to_col)
-    create_move!(from_row, from_col)
+    create_move!(from_row, from_col, move_type)
     true
   end
 
+  def undo_move!
+    from_row = moves.last.from_position[0]
+    from_col = moves.last.from_position[1]
+    update_attributes(row: from_row, col: from_col)
+    if moves.last.move_type.split[0] == 'capture'
+      undo_capture!(moves.last.move_type.split[1].to_i, row, col)
+    end
+    p moves.last
+    moves.last.destroy
+    p moves.last
+  end
+
+  def undo_capture!(piece_id, last_row, last_col)
+    Piece.find(piece_id).update_attributes(row: last_row, col: last_col)
+  end
+
   def capture_piece(row, col)
-    (enemy = enemy_at(row, col)) ? enemy.captured! : false
+    enemy = enemy_at(row, col)
+    if enemy
+      enemy.captured!
+      enemy.id
+    else
+      false
+    end
   end
 
   def captured!
     update(row: -1, col: -1)
+    true
   end
 
   def captured?
@@ -88,13 +112,13 @@ class Piece < ApplicationRecord
     in_check
   end
 
-  def create_move!(from_row, from_col)
+  def create_move!(from_row, from_col, move_type)
     last_move_number = game.moves.last ? game.moves.last.move_number : 0
     moves.create(
       move_number: last_move_number + 1,
       from_position: [from_row, from_col],
       to_position: [row, col],
-      move_type: nil, # to be implemented later
+      move_type: move_type,
       game_id: game.id
     )
   end
@@ -112,7 +136,6 @@ class Piece < ApplicationRecord
     return false if move_destination_ally?(to_row, to_col)
     return false unless move_legal?(to_row, to_col)
     return false if move_obstructed?(to_row, to_col)
-    return false if self_check?(to_row, to_col)
     true
   end
 end

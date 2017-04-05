@@ -12,14 +12,17 @@ class King < Piece
 
   # call this method on the enemy king after the end of a turn
   def checkmate?
-    if in_check? && move_space.none? { |move| valid_move?(move[0], move[1]) }
-      
-
-    end
+    return false unless in_check? && move_space.none? { |move| valid_move?(move[0], move[1]) }
+    attackers = get_attackers
+    return true if attackers.length > 1
+    return false if attacker_is_vulnerable?(attackers.first)
+    return false if attacker_is_blockable?(attackers.first)
+    true
   end
 
   def stalemate?
     if !in_check? && move_space.none? { |move| valid_move?(move[0], move[1]) }
+      true
     end
   end
 
@@ -38,5 +41,22 @@ class King < Piece
     enemy_king = enemies.where(type: 'King').first
     attackers << enemy_king if enemy_king.move_space.include?([row, col])
     attackers
+  end
+
+  def attacker_is_vulnerable?(attacker)
+    p allies.first
+    p allies.first.valid_move?(3,1)
+    allies.to_a.any? {|ally| ally.valid_move?(attacker.row, attacker.col)}
+  end
+
+  def attacker_is_blockable?(attacker)
+    return false unless ['Rook', 'Bishop', 'Queen'].include?(attacker.type)
+    attacker.path_to_king.any? do |square|
+      allies.to_a.any? {|ally| ally.valid_move?(square[0], square[1])}
+    end
+  end
+
+  def allies
+    game.pieces.where(is_black: is_black).where.not(type: 'King')
   end
 end
