@@ -49,6 +49,10 @@ class Game < ApplicationRecord
     Rook.create(game_id: id, user_id: black_player_id, row: 7, col: 7, is_black: true)
   end
 
+  def blacks_turn?
+    !moves.last.piece.is_black
+  end
+
   class Board
     attr_reader :grid
 

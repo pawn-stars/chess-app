@@ -47,6 +47,7 @@ class Piece < ApplicationRecord
     return false if move_destination_ally?(to_row, to_col)
     return false unless move_legal?(to_row, to_col)
     return false if move_obstructed?(to_row, to_col)
+    return false if self_check?(to_row, to_col)
     true
   end
 
@@ -84,6 +85,15 @@ class Piece < ApplicationRecord
       current_col += col_direction
     end
     false
+  end
+
+  def self_check?(to_row, to_col)
+    from_row = row
+    from_col = col
+    update(row: to_row, col: to_col)
+    in_check = game.pieces.where(is_black: is_black).where(type: King).in_check?
+    update(row: from_row, col: from_col)
+    in_check
   end
 
   def create_move!(from_row, from_col)

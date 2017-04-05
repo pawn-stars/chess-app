@@ -194,4 +194,32 @@ RSpec.describe Piece, type: :model do
       expect(piece2.captured?).to be_falsey
     end
   end
+
+  describe "#self_check?" do
+    before(:all) do
+      @white = User.create(
+        email: 'white@foobar.com',
+        screen_name: 'white',
+        password: 'foobar',
+        password_confirmation: 'foobar'
+      )
+      @black = User.create(
+        email: 'black@foobar.com',
+        screen_name: 'black',
+        password: 'foobar',
+        password_confirmation: 'foobar'
+      )
+      @game = @white.games.create(
+        white_player_id: @white,
+        black_player_id: @black
+      )
+      @black.games << @game
+    end
+
+    after(:all) do
+      DatabaseCleaner.clean_with(:deletion)
+    end
+
+    
+  end
 end

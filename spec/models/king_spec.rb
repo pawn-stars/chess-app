@@ -26,4 +26,9 @@ RSpec.describe King, type: :model do
       expect(king.move_legal?(from_row + 2, from_col + 3)).to be false
     end
   end
+
+  describe "#in_check?" do
+    it "" do
+    end
+  end
 end
