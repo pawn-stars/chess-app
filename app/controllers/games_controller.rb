@@ -25,9 +25,13 @@ class GamesController < ApplicationController
 
   def update
     @game = Game.find(params[:id])
-    @game.update_attributes(game_params)
+
+    if @game.white_player_id != current_user && @game.black_player_id.nil?
+      @game.update_attributes(black_player_id: current_user.id)
+    end
+
     if @game.valid?
-      current_user.games << game
+      current_user.games << @game
       @game.populate_board if @game.pieces.empty?
       redirect_to @game
     else
@@ -38,15 +42,16 @@ class GamesController < ApplicationController
   def forfeit
     @game = Game.find(params[:id])
 
-      if current_user.id == @game.white_player_id
-        @game.update_attributes(winner: @game.black_player_id)
-      end
+    if current_user.id == @game.white_player_id
+      @game.update_attributes(winner: @game.black_player_id, result: 'Forfeit')
+    end
 
-      if current_user.id == @game.black_player_id
-        @game.update_attributes(winner: @game.white_player_id)
-      end
-      flash[:alert] = 'You have forfeited the game.'
-      redirect_to root_path
+    if current_user.id == @game.black_player_id
+      @game.update_attributes(winner: @game.white_player_id, result: 'Forfeit')
+    end
+
+    flash[:alert] = 'You have forfeited the game.'
+    redirect_to games_path
   end
 
   private
