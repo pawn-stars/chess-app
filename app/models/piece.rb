@@ -26,8 +26,8 @@ class Piece < ApplicationRecord
     end
 
 
-    capture_piece(to_row, to_col)
-    update_piece(to_row,to_col,'moved')
+    # capture_piece(to_row, to_col)
+    # update_piece(to_row,to_col,'moved')
 
     # from_row = row
     # from_col = col
