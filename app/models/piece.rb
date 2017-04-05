@@ -1,3 +1,4 @@
+# rubocop:disable Metrics/CyclomaticComplexity
 class Piece < ApplicationRecord
   belongs_to :user
   belongs_to :game
@@ -5,6 +6,7 @@ class Piece < ApplicationRecord
 
   scope :are_captured, -> { where(row: -1, col: -1) }
   scope :are_not_captured, -> { where("row > ? AND col > ?", -1, -1) }
+  scope :ally_king, ->(is_black) { where(is_black: is_black).where(type: 'King') }
 
   def self.types
     %w(Pawn Rook Knight Bishop Queen King)
@@ -40,16 +42,6 @@ class Piece < ApplicationRecord
   end
 
   private
-
-  def valid_move?(to_row, to_col)
-    return false if move_nil?(to_row, to_col)
-    return false if move_out_of_bounds?(to_row, to_col)
-    return false if move_destination_ally?(to_row, to_col)
-    return false unless move_legal?(to_row, to_col)
-    return false if move_obstructed?(to_row, to_col)
-    return false if self_check?(to_row, to_col)
-    true
-  end
 
   def move_nil?(to_row, to_col)
     row == to_row && col == to_col
@@ -91,7 +83,7 @@ class Piece < ApplicationRecord
     from_row = row
     from_col = col
     update(row: to_row, col: to_col)
-    in_check = game.pieces.where(is_black: is_black).where(type: King).in_check?
+    in_check = game.pieces.ally_king(is_black).first.in_check?
     update(row: from_row, col: from_col)
     in_check
   end
@@ -110,5 +102,17 @@ class Piece < ApplicationRecord
   def enemy_at(check_row, check_col)
     enemy = game.piece_at(check_row, check_col)
     enemy if enemy && enemy.is_black != is_black
+  end
+
+  protected
+
+  def valid_move?(to_row, to_col)
+    return false if move_nil?(to_row, to_col)
+    return false if move_out_of_bounds?(to_row, to_col)
+    return false if move_destination_ally?(to_row, to_col)
+    return false unless move_legal?(to_row, to_col)
+    return false if move_obstructed?(to_row, to_col)
+    return false if self_check?(to_row, to_col)
+    true
   end
 end
