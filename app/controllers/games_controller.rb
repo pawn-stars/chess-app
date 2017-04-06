@@ -26,7 +26,7 @@ class GamesController < ApplicationController
   def update
     @game = Game.find(params[:id])
 
-    if @game.white_player_id != current_user && @game.black_player_id.nil?
+    if @game.white_player_id != current_user.id && @game.black_player_id.nil?
       @game.update_attributes(black_player_id: current_user.id)
     end
 
