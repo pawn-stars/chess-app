@@ -1,6 +1,8 @@
 # rubocop:disable Metrics/AbcSize
 
 class GamesController < ApplicationController
+  before_action :authenticate_user!, only: [:new, :create, :show, :update]
+
   def index
     @games = Game.available
   end
@@ -27,7 +29,7 @@ class GamesController < ApplicationController
     @game = Game.find(params[:id])
     @game.update_attributes(game_params)
     if @game.valid?
-      current_user.games << game
+      current_user.games << @game
       @game.populate_board if @game.pieces.empty?
       redirect_to @game
     else
