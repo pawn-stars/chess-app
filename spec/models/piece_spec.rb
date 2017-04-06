@@ -64,6 +64,13 @@ RSpec.describe Piece, type: :model do
       expect(move.game_id).to eq(@game.id)
     end
 
+    it "should undo the move if it places ally king in check" do
+      @game.pieces.create(type: 'Rook', row: 1, col: 1, is_black: true, user: @black)
+      expect(@white_king.move_to!(0, 1)).to be_falsey
+      expect(@white_king.col).to eq(0)
+      expect(@white_king.row).to eq(0)
+    end
+
     # MeO tests supporting move_to! - test private valid_move? and its called methods
     # rubocop:disable UselessAssignment
     describe "#valid_move?" do
@@ -211,10 +218,29 @@ RSpec.describe Piece, type: :model do
       pawn.undo_move!
       expect(pawn.row).to eq(1)
       expect(pawn.col).to eq(1)
+      pawn.reload
       expect(pawn.moves.length).to eq(0)
     end
-  end
 
+    it "should undo a capture move" do
+      white_pawn = @white.pieces.create(
+        type: 'Pawn', row: 1, col: 1, game_id: @game.id, is_black: false
+      )
+      black_pawn = @black.pieces.create(
+        type: 'Pawn', row: 2, col: 2, game_id: @game.id, is_black: true
+      )
+      white_pawn.move_to!(2, 2)
+      black_pawn.reload
+      expect(black_pawn.captured?).to be_truthy
+      white_pawn.undo_move!
+      white_pawn.reload
+      black_pawn.reload
+      expect(white_pawn.row).to eq(1)
+      expect(white_pawn.col).to eq(1)
+      expect(black_pawn.row).to eq(2)
+      expect(black_pawn.col).to eq(2)
+    end
+  end
 
   describe "#capture_piece" do
     before(:all) do
@@ -265,47 +291,6 @@ RSpec.describe Piece, type: :model do
       piece1.capture_piece(0, 1)
       piece2.reload
       expect(piece2.captured?).to be_falsey
-    end
-  end
-
-  describe "#self_check?" do
-    before(:all) do
-      @white = User.create(
-        email: 'white@foobar.com',
-        screen_name: 'white',
-        password: 'foobar',
-        password_confirmation: 'foobar'
-      )
-      @black = User.create(
-        email: 'black@foobar.com',
-        screen_name: 'black',
-        password: 'foobar',
-        password_confirmation: 'foobar'
-      )
-      @game = @white.games.create(
-        white_player_id: @white.id,
-        black_player_id: @black.id
-      )
-      @black.games << @game
-      @white_king = @white.pieces.create(
-        type: 'King', row: 0, col: 0, game_id: @game.id, is_black: false
-      )
-      @black_king = @black.pieces.create(
-        type: 'King', row: 7, col: 7, game_id: @game.id, is_black: true
-      )
-    end
-
-    after(:all) do
-      DatabaseCleaner.clean_with(:deletion)
-    end
-
-    it "returns false if the move does not place ally king in check" do
-      expect(@white_king.send(:self_check?, 1, 1)).to be_falsey
-    end
-
-    it "returns true if the move places ally king in check" do
-      @black.pieces.create(type: 'Rook', row: 1, col: 1, game_id: @game.id, is_black: true)
-      expect(@white_king.send(:self_check?, 0, 1)).to be_truthy
     end
   end
 end

@@ -115,6 +115,19 @@ RSpec.describe King, type: :model do
         )
         expect(@white_king.checkmate?).to be_falsey
       end
+
+      it "returns false if an attacker can be blocked" do
+        @black.pieces.create(
+          type: 'Rook', row: 2, col: 0, game_id: @game.id, is_black: true
+        )
+        @black.pieces.create(
+          type: 'Rook', row: 2, col: 1, game_id: @game.id, is_black: true
+        )
+        a = @white.pieces.create(
+          type: 'Rook', row: 1, col: 2, game_id: @game.id, is_black: false
+        )
+        expect(@white_king.checkmate?).to be_falsey
+      end
     end
 
     describe "#stalemate?" do

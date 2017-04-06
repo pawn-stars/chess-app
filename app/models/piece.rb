@@ -27,19 +27,21 @@ class Piece < ApplicationRecord
     from_col = col
     update_attributes(row: to_row, col: to_col)
     create_move!(from_row, from_col, move_type)
+    if game.pieces.ally_king(is_black).first.in_check?
+      undo_move!
+      return false
+    end
     true
   end
 
   def undo_move!
     from_row = moves.last.from_position[0]
     from_col = moves.last.from_position[1]
-    update_attributes(row: from_row, col: from_col)
     if moves.last.move_type.split[0] == 'capture'
       undo_capture!(moves.last.move_type.split[1].to_i, row, col)
     end
-    p moves.last
     moves.last.destroy
-    p moves.last
+    update_attributes(row: from_row, col: from_col)
   end
 
   def undo_capture!(piece_id, last_row, last_col)
@@ -101,15 +103,6 @@ class Piece < ApplicationRecord
       current_col += col_direction
     end
     false
-  end
-
-  def self_check?(to_row, to_col)
-    from_row = row
-    from_col = col
-    update(row: to_row, col: to_col)
-    in_check = game.pieces.ally_king(is_black).first.in_check?
-    update(row: from_row, col: from_col)
-    in_check
   end
 
   def create_move!(from_row, from_col, move_type)
