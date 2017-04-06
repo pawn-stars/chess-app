@@ -64,13 +64,6 @@ RSpec.describe Piece, type: :model do
       expect(move.game_id).to eq(@game.id)
     end
 
-    it "should undo the move if it places ally king in check" do
-      @game.pieces.create(type: 'Rook', row: 1, col: 1, is_black: true, user: @black)
-      expect(@white_king.move_to!(0, 1)).to be_falsey
-      expect(@white_king.col).to eq(0)
-      expect(@white_king.row).to eq(0)
-    end
-
     # MeO tests supporting move_to! - test private valid_move? and its called methods
     # rubocop:disable UselessAssignment
     describe "#valid_move?" do
@@ -291,6 +284,142 @@ RSpec.describe Piece, type: :model do
       piece1.capture_piece(0, 1)
       piece2.reload
       expect(piece2.captured?).to be_falsey
+    end
+  end
+
+  describe "#finalize_move!" do
+    before(:all) do
+      @white = User.create(
+        email: 'white@foobar.com',
+        screen_name: 'white',
+        password: 'foobar',
+        password_confirmation: 'foobar'
+      )
+      @black = User.create(
+        email: 'black@foobar.com',
+        screen_name: 'black',
+        password: 'foobar',
+        password_confirmation: 'foobar'
+      )
+      @game = @white.games.create(
+        white_player_id: @white.id,
+        black_player_id: @black.id
+      )
+      @black.games << @game
+      @white_king = @white.pieces.create(
+        type: 'King', row: 0, col: 0, game_id: @game.id, is_black: false
+      )
+      @black_king = @black.pieces.create(
+        type: 'King', row: 7, col: 7, game_id: @game.id, is_black: true
+      )
+    end
+
+    after(:all) do
+      DatabaseCleaner.clean_with(:deletion)
+    end
+
+    it "allows valid moves" do
+      expect(@white_king.finalize_move!(0, 1)).to be_truthy
+    end
+
+    it "undos the move and returns false if ally king is placed in check" do
+      @black.pieces.create(type: 'Rook', row: 1, col: 1, game_id: @game.id, is_black: true)
+      expect(@white_king.finalize_move!(0, 1)).to be_falsey
+      @white_king.reload
+      expect(@white_king.row).to eq(0)
+      expect(@white_king.col).to eq(0)
+    end
+  end
+
+  describe "#self_check" do
+    before(:all) do
+      @white = User.create(
+        email: 'white@foobar.com',
+        screen_name: 'white',
+        password: 'foobar',
+        password_confirmation: 'foobar'
+      )
+      @black = User.create(
+        email: 'black@foobar.com',
+        screen_name: 'black',
+        password: 'foobar',
+        password_confirmation: 'foobar'
+      )
+      @game = @white.games.create(
+        white_player_id: @white.id,
+        black_player_id: @black.id
+      )
+      @black.games << @game
+      @white_king = @white.pieces.create(
+        type: 'King', row: 0, col: 0, game_id: @game.id, is_black: false
+      )
+      @black_king = @black.pieces.create(
+        type: 'King', row: 7, col: 7, game_id: @game.id, is_black: true
+      )
+    end
+
+    after(:all) do
+      DatabaseCleaner.clean_with(:deletion)
+    end
+
+    it "returns true if the move would place ally king in check" do
+      white_pawn = @white.pieces.create(
+        type: 'Pawn', row: 0, col: 1, game_id: @game.id, is_black: false
+      )
+      black_rook = @black.pieces.create(
+        type: 'Rook', row: 0, col: 2, game_id: @game.id, is_black: true
+      )
+      expect(white_pawn.send(:self_check?, 1, 1)).to be_truthy
+    end
+  end
+
+  describe "#cant_move?" do
+    before(:all) do
+      @white = User.create(
+        email: 'white@foobar.com',
+        screen_name: 'white',
+        password: 'foobar',
+        password_confirmation: 'foobar'
+      )
+      @black = User.create(
+        email: 'black@foobar.com',
+        screen_name: 'black',
+        password: 'foobar',
+        password_confirmation: 'foobar'
+      )
+      @game = @white.games.create(
+        white_player_id: @white.id,
+        black_player_id: @black.id
+      )
+      @black.games << @game
+      @white_king = @white.pieces.create(
+        type: 'King', row: 0, col: 0, game_id: @game.id, is_black: false
+      )
+      @black_king = @black.pieces.create(
+        type: 'King', row: 7, col: 7, game_id: @game.id, is_black: true
+      )
+    end
+
+    after(:all) do
+      DatabaseCleaner.clean_with(:deletion)
+    end
+
+    it "returns true if there are no valid moves" do
+      white_pawn = @white.pieces.create(
+        type: 'Pawn', row: 5, col: 0, game_id: @game.id, is_black: false
+      )
+      @black.pieces.create(type: 'Pawn', row: 6, col: 0, game_id: @game.id, is_black: true)
+      expect(white_pawn.send(:cant_move?)).to be_truthy
+    end
+
+    it "returns true if all valid moves would put ally king in check" do
+      white_pawn = @white.pieces.create(
+        type: 'Pawn', row: 0, col: 1, game_id: @game.id, is_black: false
+      )
+      black_rook = @black.pieces.create(
+        type: 'Rook', row: 0, col: 2, game_id: @game.id, is_black: true
+      )
+      expect(white_pawn.send(:cant_move?)).to be_truthy
     end
   end
 end

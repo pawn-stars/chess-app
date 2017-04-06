@@ -21,10 +21,7 @@ class King < Piece
   end
 
   def stalemate?
-    if !in_check? && valid_moves.empty?
-      
-    end
-    false
+    !in_check? && valid_moves.empty? && allies.all? { |ally| ally.cant_move? }
   end
 
   def move_space
@@ -46,13 +43,13 @@ class King < Piece
   end
 
   def attacker_is_vulnerable?(attacker)
-    allies.to_a.any? {|ally| ally.valid_move?(attacker.row, attacker.col)}
+    allies.to_a.any? { |ally| ally.valid_move?(attacker.row, attacker.col) }
   end
 
   def attacker_is_blockable?(attacker)
-    return false unless ['Rook', 'Bishop', 'Queen'].include?(attacker.type)
+    return false unless %w(Rook Bishop Queen).include?(attacker.type)
     attacker.path_to_king.any? do |square|
-      allies.to_a.any? {|ally| ally.valid_move?(square[0], square[1])}
+      allies.to_a.any? { |ally| ally.valid_move?(square[0], square[1]) }
     end
   end
 

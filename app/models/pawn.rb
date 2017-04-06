@@ -9,6 +9,12 @@ class Pawn < Piece
 
   private
 
+  def move_destination_ally?(to_row, to_col)
+    ally = game.piece_at(to_row, to_col)
+    return true if to_col == col && ally
+    ally && ally.is_black == is_black ? true : false
+  end
+
   def single_advance?(to_row, to_col)
     to_row == row + forward_one && to_col == col
   end

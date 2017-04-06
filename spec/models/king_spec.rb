@@ -110,7 +110,7 @@ RSpec.describe King, type: :model do
         @black.pieces.create(
           type: 'Rook', row: 2, col: 1, game_id: @game.id, is_black: true
         )
-        a = @white.pieces.create(
+        @white.pieces.create(
           type: 'Rook', row: 3, col: 0, game_id: @game.id, is_black: false
         )
         expect(@white_king.checkmate?).to be_falsey
@@ -123,7 +123,7 @@ RSpec.describe King, type: :model do
         @black.pieces.create(
           type: 'Rook', row: 2, col: 1, game_id: @game.id, is_black: true
         )
-        a = @white.pieces.create(
+        @white.pieces.create(
           type: 'Rook', row: 1, col: 2, game_id: @game.id, is_black: false
         )
         expect(@white_king.checkmate?).to be_falsey
@@ -146,9 +146,10 @@ RSpec.describe King, type: :model do
         expect(@white_king.stalemate?).to be_falsey
       end
 
-      it "returns true if stalemated" do
+      it "returns true if no pieces can be moved" do
+        @black.pieces.create(type: 'Rook', row: 2, col: 0, game_id: @game.id, is_black: true)
         @black.pieces.create(type: 'Rook', row: 2, col: 1, game_id: @game.id, is_black: true)
-        @black.pieces.create(type: 'Rook', row: 1, col: 2, game_id: @game.id, is_black: true)
+        @white.pieces.create(type: 'Pawn', row: 1, col: 0, game_id: @game.id, is_black: false)
         expect(@white_king.stalemate?).to be_truthy
       end
     end

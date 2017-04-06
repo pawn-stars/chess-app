@@ -1,4 +1,4 @@
-# rubocop:disable Metrics/CyclomaticComplexity
+# rubocop:disable Metrics/ClassLength
 class Piece < ApplicationRecord
   belongs_to :user
   belongs_to :game
@@ -17,6 +17,11 @@ class Piece < ApplicationRecord
     super.merge("type" => type)
   end
 
+  def finalize_move!(to_row, to_col)
+    return false if self_check?(to_row, to_col)
+    move_to!(to_row, to_col)
+  end
+
   def move_to!(to_row, to_col)
     return false unless valid_move?(to_row, to_col)
     captured_id = capture_piece(to_row, to_col)
@@ -27,10 +32,6 @@ class Piece < ApplicationRecord
     from_col = col
     update_attributes(row: to_row, col: to_col)
     create_move!(from_row, from_col, move_type)
-    if game.pieces.ally_king(is_black).first.in_check?
-      undo_move!
-      return false
-    end
     true
   end
 
@@ -129,6 +130,22 @@ class Piece < ApplicationRecord
     return false if move_destination_ally?(to_row, to_col)
     return false unless move_legal?(to_row, to_col)
     return false if move_obstructed?(to_row, to_col)
+    true
+  end
+
+  def self_check?(to_row, to_col)
+    return false unless move_to!(to_row, to_col)
+    checked = game.pieces.ally_king(is_black).first.in_check? ? true : false
+    undo_move!
+    checked
+  end
+
+  def cant_move?
+    (0..7).each do |check_row|
+      (0..7).each do |check_col|
+        return false if valid_move?(check_row, check_col) && !self_check?(check_row, check_col)
+      end
+    end
     true
   end
 end
