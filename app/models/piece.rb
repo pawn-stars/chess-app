@@ -25,10 +25,10 @@ class Piece < ApplicationRecord
       update_piece(to_row, to_col, 'move')
     end
 
-    #from_row = row
-    #from_col = col
-    #update_attributes(row: to_row, col: to_col)
-    #create_move!(from_row, from_col)
+    # from_row = row
+    # from_col = col
+    # update_attributes(row: to_row, col: to_col)
+    # create_move!(from_row, from_col)
     true
   end
 
@@ -85,7 +85,6 @@ class Piece < ApplicationRecord
   end
 
   def move_obstructed?(to_row, to_col)
-    logger.debug "PARENT move_obstructed"
     row_direction = to_row <=> row
     col_direction = to_col <=> col
 
@@ -101,7 +100,6 @@ class Piece < ApplicationRecord
   end
 
   def create_move!(from_row, from_col, state)
-    logger.debug "CREATE MOVE FROM: #{from_row} , #{from_col}"
     last_move_number = game.moves.last ? game.moves.last.move_number : 0
     moves.create(
       move_number: last_move_number + 1,
