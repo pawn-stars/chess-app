@@ -2,28 +2,86 @@ require 'rails_helper'
 
 RSpec.describe King, type: :model do
   describe '#move_legal?' do
-    from_row = 0
-    from_col = 4
+    WHITE_ROW = 0
+    BLACK_ROW = 7
+    COL = 4
+    ROOK_COL_RIGHT = 7
+    ROOK_COL_LEFT = 0
 
-    let(:king) { King.create(row: from_row, col: from_col) }
-
-    it "allows King legal move: horizontal" do
-      expect(king.move_legal?(from_row, from_col + 1)).to be true
+    before(:all) do
+      @white = User.create(
+        email: 'white@foobar.com',
+        screen_name: 'white',
+        password: 'foobar',
+        password_confirmation: 'foobar'
+      )
+      @black = User.create(
+        email: 'black@foobar.com',
+        screen_name: 'black',
+        password: 'foobar',
+        password_confirmation: 'foobar'
+      )
+      @game = @white.games.create(
+        white_player_id: @white,
+        black_player_id: @black
+      )
+      @black.games << @game
     end
 
-    it "allows legal move: vertical" do
-      king.update_attributes(row: from_row, col: from_col)
-      expect(king.move_legal?(from_row + 1, from_col)).to be true
+    after(:all) do
+      DatabaseCleaner.clean_with(:deletion)
     end
 
-    it "allows legal move: diagonal" do
-      king.update_attributes(row: from_row, col: from_col)
-      expect(king.move_legal?(from_row + 1, from_col + 1)).to be true
-    end
+    describe "move_legal?" do
+      def row_move(king)
+        king.is_black ? -1 : 1
+      end
+      def col_move(king)
+        king.is_black ? 1 : -1
+      end
 
-    it "does not allow not legal move" do
-      king.update_attributes(row: from_row, col: from_col)
-      expect(king.move_legal?(from_row + 2, from_col + 3)).to be false
+      before(:example) do
+        Piece.delete_all
+        white_king = @game.pieces.create(
+          row: WHITE_ROW, col: COL, type: King, is_black: false, user: @white
+        )
+        black_king = @game.pieces.create(
+          row: BLACK_ROW, col: COL, type: King, is_black: false, user: @black
+        )
+        @kings = [white_king,black_king]
+      end
+
+      it "allows King legal move: horizontal" do
+        @kings.each do |king|
+          to_row = king.row + row_move(king)
+          to_col = king.col
+          expect(king.move_legal?(to_row, to_col)).to be true
+        end
+      end
+
+      it "allows King legal move: vertical" do
+        @kings.each do |king|
+          to_row = king.row
+          to_col = king.col + col_move(king)
+          expect(king.move_legal?(to_row, to_col)).to be true
+        end
+      end
+
+      it "allows King legal move: diagonal" do
+        @kings.each do |king|
+          to_row = king.row + row_move(king)
+          to_col = king.col + col_move(king)
+          expect(king.move_legal?(to_row, to_col)).to be true
+        end
+      end
+
+      it "does not allow illegal move" do
+        @kings.each do |king|
+          to_row = king.row + row_move(king)
+          to_col = king.col + 3
+          expect(king.move_legal?(to_row, to_col)).to be false
+        end
+      end
     end
   end
 end
