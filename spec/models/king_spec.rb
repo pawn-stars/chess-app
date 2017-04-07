@@ -36,19 +36,30 @@ RSpec.describe King, type: :model do
       def row_move(king)
         king.is_black ? -1 : 1
       end
+
       def col_move(king)
         king.is_black ? 1 : -1
       end
 
       before(:example) do
         Piece.delete_all
+        Move.delete_all
+
         white_king = @game.pieces.create(
           row: WHITE_ROW, col: COL, type: King, is_black: false, user: @white
         )
         black_king = @game.pieces.create(
           row: BLACK_ROW, col: COL, type: King, is_black: false, user: @black
         )
-        @kings = [white_king,black_king]
+        @kings = [white_king, black_king]
+
+        white_rook = @game.pieces.create(
+          row: WHITE_ROW, col: ROOK_COL_RIGHT, type: Rook, is_black: false, user: @white
+        )
+        black_rook = @game.pieces.create(
+          row: BLACK_ROW, col: ROOK_COL_LEFT, type: Rook, is_black: true, user: @black
+        )
+        @rooks = [white_rook, black_rook]
       end
 
       it "allows King legal move: horizontal" do
@@ -83,12 +94,58 @@ RSpec.describe King, type: :model do
         end
       end
 
-      if "should allow king to castle right or king-side" do
-        king = @kings[0]
-        rook_right = @game.pieces.create(
-          row: WHITE_ROW, COL: ROOK_COL_RIGHT, type: Rook, is_black: false, user: @white
+      it "should not allow king to castle right with no rook" do
+        @rooks[0].update_attributes(row: -1, col: -1)
+        @rooks[1].update_attributes(row: -1, col: -1)
+        expect(@kings[0].move_legal?(WHITE_ROW, COL + 2)).to be false
+      end
+
+      it "should allow king to castle right or king-side" do
+        expect(@kings[0].move_legal?(WHITE_ROW, COL + 2)).to be true
+      end
+
+      it "should allow king to castle left or queen-side" do
+        expect(@kings[1].move_legal?(BLACK_ROW, COL - 2)).to be true
+      end
+
+      # rubocop:disable UselessAssignment
+      it "should not allow king to castle right when path obstructed" do
+        bishop_right = @game.pieces.create(
+          row: WHITE_ROW, col: COL + 1, type: Bishop, is_black: false, user: @white
         )
-        expect(king.move_legal?(to_row, 6)).to be true
+        expect(@kings[0].move_legal?(WHITE_ROW, COL + 2)).to be false
+      end
+
+      it "should not allow king to castle left when path obstructed" do
+        queen = @game.pieces.create(
+          row: BLACK_ROW, col: COL - 1, type: queen, is_black: true, user: @black
+        )
+        expect(@kings[1].move_legal?(BLACK_ROW, COL - 2)).to be false
+      end
+
+      # move_to! tests to verify that first move for king and/or rook
+
+      it "should not allow king to castle since not first king move" do
+        king_move = @game.moves.create(
+          move_number: 1,
+          from_position: [WHITE_ROW, COL],
+          to_position: [WHITE_ROW + 1, COL + 1],
+          piece_id: @kings[0].id,
+          game_id: @game.id
+        )
+        expect(@kings[0].move_to!(WHITE_ROW, COL + 2)).to be false
+      end
+
+      it "should not allow king to castle since not first rook move" do
+        Move.delete_all
+        rook_move = @game.moves.create(
+          move_number: 1,
+          from_position: [BLACK_ROW, ROOK_COL_LEFT],
+          to_position: [BLACK_ROW - 4, ROOK_COL_LEFT],
+          piece_id: @rooks[1].id,
+          game_id: @game.id
+        )
+        expect(@kings[1].move_to!(BLACK_ROW, COL - 2)).to be false
       end
     end
   end
