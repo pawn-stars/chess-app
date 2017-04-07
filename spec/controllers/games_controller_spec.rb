@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe GamesController, type: :controller do
-  describe "Forfeit" do
+  describe "games#forfeit action" do
     it "should show white player as winner if black player forfeits" do
       white = User.create(
         email: 'white@test.com',
