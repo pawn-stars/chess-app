@@ -10,7 +10,7 @@ class Piece < ApplicationRecord
     %w(Pawn Rook Knight Bishop Queen King)
   end
 
-  # Adds an STI type property to the JSON data, rails doesn't do this be default
+  # Adds an STI type property to the JSON data, rails doesn't do this by default
   def serializable_hash(options = nil)
     super.merge("type" => type)
   end
@@ -20,20 +20,15 @@ class Piece < ApplicationRecord
     # en passant capture won't work if the line below executes after updating coords
 
     if capture_piece?(to_row, to_col)
-      update_piece(to_row,to_col,'capturing')
+      update_piece(to_row, to_col, 'capturing')
     else
-      update_piece(to_row,to_col,'moved')
+      update_piece(to_row, to_col, 'move')
     end
 
-
-    # capture_piece(to_row, to_col)
-    # update_piece(to_row,to_col,'moved')
-
-    # from_row = row
-    # from_col = col
-    # update_attributes(row: to_row, col: to_col)
-    # update_piece(to_row, to_col)
-    # create_move!(from_row, from_col)
+    #from_row = row
+    #from_col = col
+    #update_attributes(row: to_row, col: to_col)
+    #create_move!(from_row, from_col)
     true
   end
 
@@ -41,11 +36,11 @@ class Piece < ApplicationRecord
     from_row = row
     from_col = col
     update_attributes(row: to_row, col: to_col)
-    create_move!(from_row,from_col,state)
+    create_move!(from_row, from_col, state)
   end
 
   def capture_piece?(row, col)
-    (enemy = enemy_at(row, col)) ? enemy.update_piece(-1,-1,'captured') : false
+    (enemy = enemy_at(row, col)) ? enemy.update_piece(-1, -1, 'captured') : false
   end
 
   # def captured!
@@ -59,13 +54,10 @@ class Piece < ApplicationRecord
   private
 
   def valid_move?(to_row, to_col)
-    logger.debug "valid_move for #{type}"
+    logger.debug "*** Piece: #{id} #{type} valid_move?"
     return false if move_nil?(to_row, to_col)
     return false if move_out_of_bounds?(to_row, to_col)
     return false if move_destination_ally?(to_row, to_col)
-
-    return true if type == "Knight"
-
     return false unless move_legal?(to_row, to_col)
     return false if move_obstructed?(to_row, to_col)
     true
@@ -89,14 +81,11 @@ class Piece < ApplicationRecord
     # fail NotImplementedError 'Piece sub-class must implement #legal_move?'
     # Will remove comment and following code once all sub-classes are complete.
 
-    if type == "Knight"
-      true
-    else
-      row == to_row || col == to_col || (row - to_row).abs == (col - to_col).abs
-    end
+    row == to_row || col == to_col || (row - to_row).abs == (col - to_col).abs
   end
 
   def move_obstructed?(to_row, to_col)
+    logger.debug "PARENT move_obstructed"
     row_direction = to_row <=> row
     col_direction = to_col <=> col
 
@@ -112,12 +101,13 @@ class Piece < ApplicationRecord
   end
 
   def create_move!(from_row, from_col, state)
+    logger.debug "CREATE MOVE FROM: #{from_row} , #{from_col}"
     last_move_number = game.moves.last ? game.moves.last.move_number : 0
     moves.create(
       move_number: last_move_number + 1,
       from_position: [from_row, from_col],
       to_position: [row, col],
-      move_type: state, # to be implemented later
+      move_type: state,
       game_id: game.id
     )
   end

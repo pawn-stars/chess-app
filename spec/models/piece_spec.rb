@@ -8,6 +8,11 @@ RSpec.describe Piece, type: :model do
   end
 
   describe "#move_to!" do
+    FROM_ROW = 3
+    FROM_COL = 2
+    MOVE_ROW = 6
+    MOVE_COL = 1
+
     before(:all) do
       @user = User.create(
         email: 'foobar@foobar.com',
@@ -15,7 +20,7 @@ RSpec.describe Piece, type: :model do
         password: 'foobar',
         password_confirmation: 'foobar'
       )
-      @game = @user.games.create(white_player_id: @user)
+      @game = @user.games.create(white_player_id: @user.id)
     end
 
     after(:all) do
@@ -27,137 +32,118 @@ RSpec.describe Piece, type: :model do
     end
 
     it "should update row and col attributes" do
-      piece = @game.pieces.create(
-        row: 0, col: 0, user: @user
-      )
-      piece.move_to!(7, 7)
-
+      piece = @game.pieces.create(row: FROM_ROW, col: FROM_COL, user: @user)
+      piece.move_to!(7, FROM_COL)
       expect(piece.row).to eq(7)
-      expect(piece.col).to eq(7)
+      expect(piece.col).to eq(FROM_COL)
     end
 
     it "should create a new move" do
-      piece = @game.pieces.create(
-        row: 0, col: 0, user: @user
-      )
-      piece.move_to!(7, 7)
+      piece = @game.pieces.create(row: FROM_ROW, col: FROM_COL, user: @user)
+      piece.move_to!(7, FROM_COL)
       move = piece.moves.last
-
       expect(move.move_number).to eq(1)
-      expect(move.from_position).to eq([0, 0])
-      expect(move.to_position).to eq([7, 7])
+      expect(move.from_position).to eq([FROM_ROW, FROM_COL])
+      expect(move.to_position).to eq([7, FROM_COL])
       expect(move.game_id).to eq(@game.id)
     end
 
-    # MeO tests for move_to! - test valid_move? and its called methods
-    FROM_ROW = 3
-    FROM_COL = 2
+    # MeO tests supporting move_to! - test private valid_move? and its called methods
+    # rubocop:disable UselessAssignment
+    describe "tests private valid_move?" do
+      it "with a nil move" do
+        piece = @game.pieces.create(row: FROM_ROW, col: FROM_COL, user: @user)
+        expect(piece.send(:valid_move?, FROM_ROW, FROM_COL)).to be false
+      end
+      it "with an off-board move" do
+        piece = @game.pieces.create(row: FROM_ROW, col: FROM_COL, user: @user)
+        expect(piece.send(:valid_move?, FROM_ROW, 8)).to be false
+      end
+      it "with an ally-occupied destination" do
+        piece1 = @game.pieces.create(row: MOVE_ROW, col: MOVE_COL, is_black: true, user: @user)
+        piece2 = @game.pieces.create(row: MOVE_ROW - 4, col: MOVE_COL, is_black: true, user: @user)
+        expect(piece1.send(:valid_move?, MOVE_ROW - 4, MOVE_COL)).to be false
+      end
+      it "with an obstructed diagonal path" do
+        piece1 = @game.pieces.create(row: MOVE_ROW, col: MOVE_COL, user: @user)
+        piece2 = @game.pieces.create(row: MOVE_ROW - 2, col: MOVE_COL + 2, user: @user)
+        expect(piece1.send(:valid_move?, MOVE_ROW - 4, MOVE_COL + 4)).to be false
+      end
+    end
 
-    describe "#move_nil?" do
-      it "tests private method move_nil? with a nil move" do
-        piece = @game.pieces.create(
-          row: FROM_ROW, col: FROM_COL, user: @user
-        )
+    describe "tests private move_nil?" do
+      it "with a nil move" do
+        piece = @game.pieces.create(row: FROM_ROW, col: FROM_COL, user: @user)
         expect(piece.send(:move_nil?, FROM_ROW, FROM_COL)).to be true
       end
-
-      it "tests private method move_nil? with a non-nil move" do
-        piece = @game.pieces.create(
-          row: FROM_ROW, col: FROM_COL, user: @user
-        )
+      it "with a non-nil move" do
+        piece = @game.pieces.create(row: FROM_ROW, col: FROM_COL, user: @user)
         expect(piece.send(:move_nil?, 7, 7)).to be false
       end
     end
 
-    describe "#move_out_bounds?" do
-      it "tests private method move_out_of_bounds? with an off-board move" do
-        piece = @game.pieces.create(
-          row: FROM_ROW, col: FROM_COL, user: @user
-        )
+    describe "tests private move_out_bounds?" do
+      it "with an off-board move" do
+        piece = @game.pieces.create(row: FROM_ROW, col: FROM_COL, user: @user)
         expect(piece.send(:move_out_of_bounds?, FROM_ROW, 8)).to be true
       end
-
-      it "tests private method move_out_of_bounds? with an on-board move" do
-        piece = @game.pieces.create(
-          row: FROM_ROW, col: FROM_COL, user: @user
-        )
+      it "with an on-board move" do
+        piece = @game.pieces.create(row: FROM_ROW, col: FROM_COL, user: @user)
         expect(piece.send(:move_out_of_bounds?, FROM_ROW + 1, FROM_COL + 1)).to be false
       end
     end
 
-    describe "#valid_move?" do
-      it "tests private method valid_move? with a nil move" do
-        piece = @game.pieces.create(
-          row: FROM_ROW, col: FROM_COL, user: @user
-        )
-        expect(piece.send(:valid_move?, FROM_ROW, FROM_COL)).to be false
+    describe "tests private move_destination_ally?" do
+      it "with an empty destination" do
+        piece = @game.pieces.create(row: MOVE_ROW, col: MOVE_COL, is_black: true, user: @user)
+        expect(piece.send(:move_destination_ally?, MOVE_ROW - 4, MOVE_COL)).to be false
       end
-
-      it "tests private method valid_move? with an out of bounds move" do
-        piece = @game.pieces.create(
-          row: FROM_ROW, col: FROM_COL, user: @user
-        )
-        expect(piece.send(:valid_move?, FROM_ROW, 8)).to be false
+      it "with an enemy-occupied destination" do
+        piece1 = @game.pieces.create(row: MOVE_ROW, col: MOVE_COL, is_black: true, user: @user)
+        piece2 = @game.pieces.create(row: MOVE_ROW - 4, col: MOVE_COL, is_black: false, user: @user)
+        expect(piece1.send(:move_destination_ally?, MOVE_ROW - 4, MOVE_COL)).to be false
+      end
+      it "with an ally-occupied destination" do
+        piece1 = @game.pieces.create(row: MOVE_ROW, col: MOVE_COL, is_black: true, user: @user)
+        piece2 = @game.pieces.create(row: MOVE_ROW - 4, col: MOVE_COL, is_black: true, user: @user)
+        expect(piece1.send(:move_destination_ally?, MOVE_ROW - 4, MOVE_COL)).to be true
       end
     end
 
-    # This should be integrated into the '#move_to!' group
-    # move_to! with an out-of-bounds move
-    it "should not move the piece out of bounds" do
-      to_col = 8
-      piece = @game.pieces.create(
-        row: FROM_ROW, col: FROM_COL, user: @user
-      )
-      piece.move_to!(FROM_ROW, to_col)
-      expect(piece.row).to eq(FROM_ROW)
-      expect(piece.col).to eq(FROM_COL)
-    end
-
-    # remove after all piece subclass tests complete
-    describe "#move_legal?" do
-      it "should not move the piece due to illegal move" do
-        piece = @game.pieces.create(
-          row: FROM_ROW, col: FROM_COL, user: @user
-        )
-        piece.move_to!(FROM_ROW + 2, FROM_COL + 1)
-        expect(piece.row).to eq(FROM_ROW)
-        expect(piece.col).to eq(FROM_COL)
+    describe "tests private move_obstructed?" do
+      it "with horizontal move and no obstruction" do
+        piece = @game.pieces.create(row: MOVE_ROW, col: MOVE_COL, user: @user)
+        expect(piece.send(:move_obstructed?, MOVE_ROW - 4, MOVE_COL)).to be false
+      end
+      it "with horizontal move and obstruction" do
+        piece1 = @game.pieces.create(row: MOVE_ROW, col: MOVE_COL, user: @user)
+        piece2 = @game.pieces.create(row: MOVE_ROW, col: MOVE_COL + 2, user: @user)
+        expect(piece1.send(:move_obstructed?, MOVE_ROW, MOVE_COL + 6)).to be true
       end
 
-      it "should move the piece: horizonal move" do
-        to_col = 7
-        piece = @game.pieces.create(
-          row: FROM_ROW, col: FROM_COL, user: @user
-        )
-        piece.move_to!(FROM_ROW, to_col)
-        expect(piece.row).to eq(FROM_ROW)
-        expect(piece.col).to eq(to_col)
+      it "with vertical move and no obstruction" do
+        piece = @game.pieces.create(row: MOVE_ROW, col: MOVE_COL, user: @user)
+        expect(piece.send(:move_obstructed?, MOVE_ROW - 4, MOVE_COL)).to be false
+      end
+      it "with vertical move and obstruction" do
+        piece1 = @game.pieces.create(row: MOVE_ROW, col: MOVE_COL, user: @user)
+        piece2 = @game.pieces.create(row: MOVE_ROW - 2, col: MOVE_COL, user: @user)
+        expect(piece1.send(:move_obstructed?, MOVE_ROW - 4, MOVE_COL)).to be true
       end
 
-      it "should move the piece: vertical move" do
-        to_row = 7
-        piece = @game.pieces.create(
-          row: FROM_ROW, col: FROM_COL, user: @user
-        )
-        piece.move_to!(to_row, FROM_COL)
-        expect(piece.row).to eq(to_row)
-        expect(piece.col).to eq(FROM_COL)
+      it "with diagonal move and no obstruction" do
+        piece = @game.pieces.create(row: MOVE_ROW, col: MOVE_COL, user: @user)
+        expect(piece.send(:move_obstructed?, MOVE_ROW - 4, MOVE_COL + 4)).to be false
       end
-
-      it "should move the piece: diagonal move" do
-        to_row = 6
-        to_col = 5
-        piece = @game.pieces.create(
-          row: FROM_ROW, col: FROM_COL, user: @user
-        )
-        piece.move_to!(to_row, to_col)
-        expect(piece.row).to eq(to_row)
-        expect(piece.col).to eq(to_col)
+      it "with diagonal move and obstruction" do
+        piece1 = @game.pieces.create(row: MOVE_ROW, col: MOVE_COL, user: @user)
+        piece2 = @game.pieces.create(row: MOVE_ROW - 2, col: MOVE_COL + 2, user: @user)
+        expect(piece1.send(:move_obstructed?, MOVE_ROW - 4, MOVE_COL + 4)).to be true
       end
     end
   end
 
-  describe "#capture_piece" do
+  describe "#capture_piece?" do
     before(:all) do
       @white = User.create(
         email: 'white@foobar.com',
@@ -190,7 +176,7 @@ RSpec.describe Piece, type: :model do
         game_id: @game.id,
         is_black: true
       )
-      expect(piece1.capture_piece(0, 1)).to be_truthy
+      expect(piece1.capture_piece?(0, 1)).to be_truthy
       piece2.reload
       expect(piece2.captured?).to be_truthy
     end
@@ -203,7 +189,7 @@ RSpec.describe Piece, type: :model do
         game_id: @game.id,
         is_black: false
       )
-      piece1.capture_piece(0, 1)
+      piece1.capture_piece?(0, 1)
       piece2.reload
       expect(piece2.captured?).to be_falsey
     end

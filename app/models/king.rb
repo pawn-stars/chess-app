@@ -1,7 +1,7 @@
 class King < Piece
 
   def valid_move?(to_row, to_col)
-    logger.debug "valid_move for #{type}"
+    logger.debug "*** KING: #{id} #{type} valid_move?"
     return false if move_nil?(to_row, to_col)
     return false if move_out_of_bounds?(to_row, to_col)
     return false if move_destination_ally?(to_row, to_col)
@@ -24,43 +24,38 @@ class King < Piece
     logger.debug "CASTLE"
     return false unless moves.empty?
     return false unless row == to_row   # on same row
-    return false until (col - to_col).abs == 2   # moved 2 spaces
+    return false unless (col - to_col).abs == 2   # moved 2 spaces
 
     # verify rook in correct location and has not moved
     logger.debug("Getting the rook")
     @rook = nil
-    side = ''
-    new_king_col = new_rook_col = -1
-    if col < to_col   # king side castle
-      side = 'king'
-      new_king_col = 6
-      new_rook_col = 5
-      @rook = rook_at(row,7)
+
+    # get the correct rook for castle side, make sure first move,
+    # path from king to rook not obstructed
+    new_rook_col = -1
+    if col < to_col
+      logger.debug "get right rook"
+       @rook = rook_at(row,7)
+       new_rook_col = 5
     else
-      side = 'queen'
-      new_king_col = 2
-      new_rook_col = 3
+      logger.debug "get left rook"
       @rook = rook_at(row,0)
+      new_rook_col = 3
     end
     return false unless @rook
-
     return false if move_obstructed?(@rook.row,@rook.col)
-    logger.debug "continue with the castle. clear path"
 
-    update_attributes(row: to_row, col: new_king_col)
-    create_move!(to_row, new_king_col)
-
-    @rook.update_attributes(row: to_row, col: new_rook_col)
-    create_move!(to_row, new_rook_col)
-
+    # update the rook's row,col. parent class will update the king's row,col
+    logger.debug "continue with the castle. clear path. move rook #{@rook.id} in column #{@rook.col}"
+    @rook.update_piece(row, new_rook_col, 'castled')
+    # create_move!(row, new_rook_col)
     logger.debug "king and rook should have castled"
     true
-
   end
 
   def rook_at(check_row, check_col)
     rook = game.piece_at(check_row, check_col)
+    logger.debug "rook at #{check_col}"
     rook if rook && rook.moves.empty?
   end
-
-end   # Class King
+end   # CLASS
