@@ -82,6 +82,14 @@ RSpec.describe King, type: :model do
           expect(king.move_legal?(to_row, to_col)).to be false
         end
       end
+
+      if "should allow king to castle right or king-side" do
+        king = @kings[0]
+        rook_right = @game.pieces.create(
+          row: WHITE_ROW, COL: ROOK_COL_RIGHT, type: Rook, is_black: false, user: @white
+        )
+        expect(king.move_legal?(to_row, 6)).to be true
+      end
     end
   end
 end
