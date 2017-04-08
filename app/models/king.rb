@@ -4,6 +4,15 @@ class King < Piece
     row_diff = (row - to_row).abs
     col_diff = (col - to_col).abs
     row_diff <= 1 && col_diff <= 1
+    # add castling moves to the 'whitelist', then verify the validity of the castle
+    #   further down in the logic
+  end
+
+  # override to enable castling
+  def finalize_move!(to_row, to_col)
+    return false if !get_attackers(to_row, to_col).empty?
+    move_to!(to_row, to_col)
+    # for castling something like: move_the_rook if castling?
   end
 
   def in_check?
