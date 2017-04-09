@@ -16,8 +16,29 @@ RSpec.describe GamesController, type: :controller do
         password: '123456',
         password_confirmation: '123456'
       )
+      sign_in white
       game = Game.create(white_player_id: white.id, black_player_id: black.id)
-      post :forfeit, params: {id: game.id, game: { black_player_id: black.id} }
+      post :forfeit, params: {id: game.id, game: { winner_id: white.id} }
+
+      expect(response).to redirect_to(games_path)
+    end
+
+    it "should show black player as winner if white player forfeits" do
+      white = User.create(
+        email: 'white@test.com',
+        screen_name: 'white_player',
+        password: '123456',
+        password_confirmation: '123456'
+      )
+      black = User.create(
+        email: 'black@test.com',
+        screen_name: 'black_player',
+        password: '123456',
+        password_confirmation: '123456'
+      )
+      sign_in white
+      game = Game.create(white_player_id: white.id, black_player_id: black.id)
+      post :forfeit, params: {id: game.id, game: { winner_id: black.id} }
 
       expect(response).to redirect_to(games_path)
     end

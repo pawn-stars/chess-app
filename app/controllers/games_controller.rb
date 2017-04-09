@@ -43,11 +43,11 @@ class GamesController < ApplicationController
     @game = Game.find(params[:id])
 
     if current_user.id == @game.white_player_id
-      @game.update_attributes(winner: @game.black_player_id, result: 'Forfeit')
+      @game.update_attributes(winner_id: @game.black_player_id, result: 'Forfeit')
     end
 
     if current_user.id == @game.black_player_id
-      @game.update_attributes(winner: @game.white_player_id, result: 'Forfeit')
+      @game.update_attributes(winner_id: @game.white_player_id, result: 'Forfeit')
     end
 
     flash[:alert] = 'You have forfeited the game.'
