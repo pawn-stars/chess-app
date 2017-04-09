@@ -17,7 +17,7 @@ RSpec.describe GamesController, type: :controller do
         password_confirmation: '123456'
       )
       game = Game.create(white_player_id: white.id, black_player_id: black.id)
-      post :forfeit, params: {id: game.id}
+      post :forfeit, params: {id: game.id, game: { black_player_id: black.id} }
 
       expect(response).to redirect_to(games_path)
     end
