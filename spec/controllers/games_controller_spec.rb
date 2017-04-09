@@ -7,6 +7,20 @@ RSpec.describe GamesController, type: :controller do
       post :create, params: { id: game.id }
       expect(response).to redirect_to new_user_session_path
     end
+
+    it "should allow logged in user to start a game" do
+      user = User.create(
+        email: 'test@test.com',
+        screen_name: 'test',
+        password: '123456',
+        password_confirmation: '123456'
+      )
+      sign_in user
+
+      game = Game.create
+      post :create, params: { id: game.id }
+      expect(response).to redirect_to(Game.last)
+    end
   end
 
   describe "games#update action" do
@@ -15,6 +29,20 @@ RSpec.describe GamesController, type: :controller do
       patch :update, params: { id: game.id }
       expect(response).to redirect_to new_user_session_path
     end
+
+    it "should allow logged in user to join a game" do
+      @user = User.create(
+        email: 'test@test.com',
+        screen_name: 'test',
+        password: '123456',
+        password_confirmation: '123456'
+      )
+      sign_in @user
+
+      game = Game.create
+      patch :update, params: { id: game.id, game: { black_player_id: @user } }
+      expect(response).to redirect_to game
+    end
   end
 
   describe "games#show action" do
@@ -22,6 +50,20 @@ RSpec.describe GamesController, type: :controller do
       game = Game.create
       get :show, params: { id: game.id }
       expect(response).to redirect_to new_user_session_path
+    end
+
+    it "should allow logged in user to show a game" do
+      @user = User.create(
+        email: 'test@test.com',
+        screen_name: 'test',
+        password: '123456',
+        password_confirmation: '123456'
+      )
+      sign_in @user
+
+      game = Game.create
+      get :show, params: { id: game.id }
+      expect(response).to have_http_status(:success)
     end
   end
 end
