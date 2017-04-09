@@ -1,6 +1,6 @@
-# rubocop:disable Metrics/AbcSize
-
 class GamesController < ApplicationController
+  before_action :authenticate_user!, only: [:new, :create, :show, :update]
+
   def index
     @games = Game.available
   end
