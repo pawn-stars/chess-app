@@ -1,7 +1,6 @@
 require 'rails_helper'
 
 RSpec.describe GamesController, type: :controller do
-
   describe "games#forfeit action" do
     it "should show white player as winner if black player forfeits" do
       white = User.create(
@@ -18,7 +17,7 @@ RSpec.describe GamesController, type: :controller do
       )
       sign_in white
       game = Game.create(white_player_id: white.id, black_player_id: black.id)
-      post :forfeit, params: {id: game.id, game: { winner_id: white.id} }
+      post :forfeit, params: { id: game.id, game: { winner_id: white.id } }
 
       expect(response).to redirect_to(games_path)
     end
@@ -38,7 +37,7 @@ RSpec.describe GamesController, type: :controller do
       )
       sign_in white
       game = Game.create(white_player_id: white.id, black_player_id: black.id)
-      post :forfeit, params: {id: game.id, game: { winner_id: black.id} }
+      post :forfeit, params: { id: game.id, game: { winner_id: black.id } }
 
       expect(response).to redirect_to(games_path)
     end
