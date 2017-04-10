@@ -122,6 +122,19 @@ class Piece < ApplicationRecord
     enemy if enemy && enemy.is_black != is_black
   end
 
+  def get_path(to_row, to_col)
+    return nil if %w(Rook Bishop Queen).exclude?(type)
+    path = []
+    current_row = row
+    current_col = col
+    until current_row == to_row && current_col == to_col
+      current_row += to_row <=> current_row
+      current_col += to_col <=> current_col
+      path << [current_row, current_col]
+    end
+    path[0..-2]
+  end
+
   protected
 
   def valid_move?(to_row, to_col)
