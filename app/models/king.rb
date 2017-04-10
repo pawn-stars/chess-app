@@ -10,13 +10,13 @@ class King < Piece
 
   # override to enable castling
   def finalize_move!(to_row, to_col)
-    return false if !get_attackers(to_row, to_col).empty?
+    return false if get_attackers(to_row, to_col).present?
     move_to!(to_row, to_col)
     # for castling something like: move_the_rook if castling?
   end
 
   def in_check?
-    !get_attackers(row, col).empty?
+    get_attackers(row, col).present?
   end
 
   # call this method on the enemy king after the end of a turn
@@ -52,7 +52,7 @@ class King < Piece
   end
 
   def attacker_is_vulnerable?(attacker)
-    allies.to_a.any? { |ally| ally.valid_move?(attacker.row, attacker.col) }
+    allies.any? { |ally| ally.valid_move?(attacker.row, attacker.col) }
   end
 
   def attacker_is_blockable?(attacker)
