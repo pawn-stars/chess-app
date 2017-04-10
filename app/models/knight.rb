@@ -4,4 +4,8 @@ class Knight < Piece
     col_diff = (col - to_col).abs
     (row_diff == 1 && col_diff == 2) || (row_diff == 2 && col_diff == 1)
   end
+
+  def move_obstructed?(_to_row, _to_col)
+    false
+  end
 end
