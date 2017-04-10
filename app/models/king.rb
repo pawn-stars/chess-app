@@ -15,7 +15,7 @@ class King < Piece
     return true if row_diff <= 1 && col_diff <= 1
 
     legal_castle_move(to_row, to_col)
-  end # end move_legal?
+  end
 
   private
 
@@ -35,11 +35,7 @@ class King < Piece
     rook = get_rook?(to_col)
     return false unless rook
     return false if move_obstructed?(row, rook.col)
-    new_rook_col = if rook.col.zero?
-                     3
-                   else
-                     5
-                   end
+    new_rook_col = rook.col.zero? ? 3 : 5
     rook.update_piece(row, new_rook_col, 'castled')
     true
   end
@@ -52,4 +48,4 @@ class King < Piece
     rook = game.piece_at(check_row, check_col)
     rook if rook && rook.moves.empty?
   end
-end # CLASS
+end
