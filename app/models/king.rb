@@ -1,4 +1,5 @@
 # rubocop:disable Metrics/AbcSize
+# rubocop:disable Style/SymbolProc
 class King < Piece
   def move_legal?(to_row, to_col)
     row_diff = (row - to_row).abs

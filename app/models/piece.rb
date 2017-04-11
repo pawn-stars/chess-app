@@ -36,10 +36,9 @@ class Piece < ApplicationRecord
   end
 
   def undo_move!
-    from_row = moves.last.from_position[0]
-    from_col = moves.last.from_position[1]
-    if moves.last.move_type.split[0] == 'capture'
-      undo_capture!(moves.last.move_type.split[1].to_i, row, col)
+    from_row, from_col = moves.last.from_position
+    if (captured_piece_id = get_captive_id(moves.last))
+      undo_capture!(captured_piece_id.to_i, row, col)
     end
     moves.last.destroy
     update_attributes(row: from_row, col: from_col)
@@ -133,6 +132,12 @@ class Piece < ApplicationRecord
       path << [current_row, current_col]
     end
     path[0..-2]
+  end
+
+  def get_captive_id(move)
+    last_move_type, captured_piece_id = move.move_type.split
+    return captured_piece_id if last_move_type == 'capture'
+    nil
   end
 
   protected
