@@ -25,17 +25,11 @@ class GamesController < ApplicationController
 
   def update
     @game = Game.find(params[:id])
-
-    if @game.white_player_id != current_user.id && @game.black_player_id.nil?
-      @game.update_attributes(black_player_id: current_user.id)
-    end
-
+    black_player? unless @game.black_player_id.present?
     if @game.valid?
-      current_user.games << @game
-      @game.populate_board if @game.pieces.empty?
-      redirect_to @game
+      update_valid_game
     else
-      render :index, text: "Not Allowed"
+      render :index, text: "Not Allowed. Invalid Game"
     end
   end
 
@@ -47,6 +41,17 @@ class GamesController < ApplicationController
   end
 
   private
+
+  def black_player?
+    return false if @game.white_player_id == current_user.id
+    @game.update_attributes(black_player_id: current_user.id)
+  end
+
+  def update_valid_game
+    current_user.games << @game
+    @game.populate_board if @game.pieces.empty?
+    redirect_to @game
+  end
 
   def game_params
     params.require(:game).permit(:black_player_id)
