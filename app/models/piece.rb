@@ -35,11 +35,8 @@ class Piece < ApplicationRecord
   end
 
   def capture_piece(row, col)
-    # my original (enemy = enemy_at(row, col)) ? enemy.update_piece(-1, -1, 'captured') : false
-    # Jim from check PR
     enemy = enemy_at(row, col)
     if enemy
-      # enemy.captured!
       enemy.update_piece(-1, -1, 'captured')
       enemy.id
     else

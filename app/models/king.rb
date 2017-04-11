@@ -9,7 +9,6 @@ class King < Piece
     move_legal_castle?(to_col)
   end
 
-  # Jacob requested change
   def move_obstructed?(_to_row, _to_col)
     false
   end
@@ -20,10 +19,7 @@ class King < Piece
 
   private
 
-  # Jacob - keeping name as below instead of can_castle_to
-  #         follows naming conventions from piece.rb with move_<something>
   def move_legal_castle?(to_col)
-    # Jacob - moved here to fix rubcocop ABC error on move_legal?
     return false unless moves.empty?
 
     rook = get_castling_rook(to_col)
