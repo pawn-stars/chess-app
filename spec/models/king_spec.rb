@@ -97,7 +97,7 @@ RSpec.describe King, type: :model do
       it "should not allow king to castle right with no rook" do
         @rooks[0].update_attributes(row: -1, col: -1)
         @rooks[1].update_attributes(row: -1, col: -1)
-        expect(@kings[0].move_legal?(WHITE_ROW, COL + 2)).to be false
+        expect(@kings[0].move_legal?(WHITE_ROW, COL + 2)).to be_falsey
       end
 
       it "should allow king to castle right or king-side" do

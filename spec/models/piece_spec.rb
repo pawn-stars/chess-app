@@ -143,7 +143,7 @@ RSpec.describe Piece, type: :model do
     end
   end
 
-  describe "#capture_piece?" do
+  describe "#capture_piece" do
     before(:all) do
       @white = User.create(
         email: 'white@foobar.com',
@@ -169,27 +169,41 @@ RSpec.describe Piece, type: :model do
     end
 
     it "should capture a piece" do
-      piece1 = @white.pieces.create(row: 0, col: 0, game_id: @game.id, is_black: false)
+      piece1 = @white.pieces.create(
+        row: 0,
+        col: 0,
+        game_id: @game.id,
+        is_black: false,
+        user: @white
+      )
       piece2 = @black.pieces.create(
         row: 0,
         col: 1,
         game_id: @game.id,
-        is_black: true
+        is_black: true,
+        user: @black
       )
-      expect(piece1.capture_piece?(0, 1)).to be_truthy
+      expect(piece1.capture_piece(0, 1)).to be_truthy
       piece2.reload
       expect(piece2.captured?).to be_truthy
     end
 
     it "should not capture a player's own piece" do
-      piece1 = @white.pieces.create(row: 0, col: 0, game_id: @game.id, is_black: false)
+      piece1 = @white.pieces.create(
+        row: 0,
+        col: 0,
+        game_id: @game.id,
+        is_black:
+        false, user: @white
+      )
       piece2 = @white.pieces.create(
         row: 0,
         col: 1,
         game_id: @game.id,
-        is_black: false
+        is_black: false,
+        user: @white
       )
-      piece1.capture_piece?(0, 1)
+      piece1.capture_piece(0, 1)
       piece2.reload
       expect(piece2.captured?).to be_falsey
     end

@@ -17,30 +17,34 @@ class Piece < ApplicationRecord
 
   def move_to!(to_row, to_col)
     return false unless valid_move?(to_row, to_col)
-    # en passant capture won't work if the line below executes after updating coords
 
-    if capture_piece?(to_row, to_col)
-      update_piece(to_row, to_col, 'capturing')
-    else
-      update_piece(to_row, to_col, 'move')
-    end
-
-    # from_row = row
-    # from_col = col
-    # update_attributes(row: to_row, col: to_col)
-    # create_move!(from_row, from_col)
+    # merging code from check PR - but keeping my method update_piece
+    captured_id = capture_piece(to_row, to_col)
+    move_type = 'normal'
+    move_type = 'castle' if castling?(to_row, to_col)
+    move_type = "captured #{captured_id}" if captured_id
+    update_piece(to_row, to_col, move_type)
     true
   end
 
-  def update_piece(to_row, to_col, state)
+  def update_piece(to_row, to_col, move_type)
     from_row = row
     from_col = col
     update_attributes(row: to_row, col: to_col)
-    create_move!(from_row, from_col, state)
+    create_move!(from_row, from_col, move_type)
   end
 
-  def capture_piece?(row, col)
-    (enemy = enemy_at(row, col)) ? enemy.update_piece(-1, -1, 'captured') : false
+  def capture_piece(row, col)
+    # my original (enemy = enemy_at(row, col)) ? enemy.update_piece(-1, -1, 'captured') : false
+    # Jim from check PR
+    enemy = enemy_at(row, col)
+    if enemy
+      # enemy.captured!
+      enemy.update_piece(-1, -1, 'captured')
+      enemy.id
+    else
+      false
+    end
   end
 
   # def captured!
@@ -51,10 +55,13 @@ class Piece < ApplicationRecord
     row < 0 && col < 0
   end
 
+  def castling?(_to_row, _to_col)
+    false
+  end
+
   private
 
   def valid_move?(to_row, to_col)
-    logger.debug "*** Piece: #{id} #{type} valid_move?"
     return false if move_nil?(to_row, to_col)
     return false if move_out_of_bounds?(to_row, to_col)
     return false if move_destination_ally?(to_row, to_col)
