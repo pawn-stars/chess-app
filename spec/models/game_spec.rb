@@ -65,8 +65,8 @@ RSpec.describe Game, type: :model do
 
     describe "#grid" do
       it "returns an 8x8 array that may have Piece instances as elements" do
-        piece1 = @game.pieces.create(row: 0, col: 0, user: @user)
-        piece2 = @game.pieces.create(row: 7, col: 7, user: @user)
+        piece1 = @game.pieces.create(row: 0, col: 0, user: @user, is_black: true)
+        piece2 = @game.pieces.create(row: 7, col: 7, user: @user, is_black: true)
         board = Game::Board.new(@game.pieces)
 
         expect(board.grid[0][0].id).to eq(piece1.id)

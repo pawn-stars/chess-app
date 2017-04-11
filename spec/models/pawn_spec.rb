@@ -40,6 +40,12 @@ RSpec.describe Pawn, type: :model do
 
     before(:example) do
       Piece.delete_all
+      @white_king = @white.pieces.create(
+        type: 'King', row: 0, col: 0, game_id: @game.id, is_black: false
+      )
+      @black_king = @black.pieces.create(
+        type: 'King', row: 7, col: 7, game_id: @game.id, is_black: true
+      )
       white_pawn = @game.pieces.create(
         row: 1, col: 1, type: Pawn, is_black: false, user: @white
       )

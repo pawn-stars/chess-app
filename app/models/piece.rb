@@ -1,3 +1,4 @@
+# rubocop:disable Metrics/ClassLength
 class Piece < ApplicationRecord
   belongs_to :user
   belongs_to :game
@@ -5,6 +6,7 @@ class Piece < ApplicationRecord
 
   scope :are_captured, -> { where(row: -1, col: -1) }
   scope :are_not_captured, -> { where("row > ? AND col > ?", -1, -1) }
+  scope :ally_king, ->(is_black) { where(is_black: is_black).where(type: 'King') }
 
   def self.types
     %w(Pawn Rook Knight Bishop Queen King)
@@ -15,38 +17,52 @@ class Piece < ApplicationRecord
     super.merge("type" => type)
   end
 
-  def move_to!(to_row, to_col)
-    return false unless valid_move?(to_row, to_col)
-
-    # merging code from check PR - but keeping my method update_piece
-    captured_id = capture_piece(to_row, to_col)
-    move_type = 'normal'
-    move_type = 'castle' if castling?(to_row, to_col)
-    move_type = "captured #{captured_id}" if captured_id
-    update_piece(to_row, to_col, move_type)
-    true
+  def finalize_move!(to_row, to_col)
+    return false if self_check?(to_row, to_col)
+    move_to!(to_row, to_col)
   end
 
-  def update_piece(to_row, to_col, move_type)
+  def move_to!(to_row, to_col)
+    return false unless valid_move?(to_row, to_col)
+    captured_id = capture_piece(to_row, to_col)
+    move_type = 'normal'
+    move_type = "capture #{captured_id}" if captured_id
+    move_type = 'castle' if castling?(to_row, to_col)
+
     from_row = row
     from_col = col
     update_attributes(row: to_row, col: to_col)
     create_move!(from_row, from_col, move_type)
+    true
+  end
+
+  def undo_move!
+    from_row, from_col = moves.last.from_position
+    if (captured_piece_id = get_captive_id(moves.last))
+      undo_capture!(captured_piece_id.to_i, row, col)
+    end
+    moves.last.destroy
+    update_attributes(row: from_row, col: from_col)
+  end
+
+  def undo_capture!(piece_id, last_row, last_col)
+    Piece.find(piece_id).update_attributes(row: last_row, col: last_col)
   end
 
   def capture_piece(row, col)
     enemy = enemy_at(row, col)
     if enemy
-      enemy.update_piece(-1, -1, 'captured')
+      enemy.captured!
       enemy.id
     else
       false
     end
   end
 
-  # def captured!
-  #   update(row: -1, col: -1)
-  # end
+  def captured!
+    update(row: -1, col: -1)
+    true
+  end
 
   def captured?
     row < 0 && col < 0
@@ -57,15 +73,6 @@ class Piece < ApplicationRecord
   end
 
   private
-
-  def valid_move?(to_row, to_col)
-    return false if move_nil?(to_row, to_col)
-    return false if move_out_of_bounds?(to_row, to_col)
-    return false if move_destination_ally?(to_row, to_col)
-    return false unless move_legal?(to_row, to_col)
-    return false if move_obstructed?(to_row, to_col)
-    true
-  end
 
   def move_nil?(to_row, to_col)
     row == to_row && col == to_col
@@ -103,13 +110,13 @@ class Piece < ApplicationRecord
     false
   end
 
-  def create_move!(from_row, from_col, state)
+  def create_move!(from_row, from_col, move_type)
     last_move_number = game.moves.last ? game.moves.last.move_number : 0
     moves.create(
       move_number: last_move_number + 1,
       from_position: [from_row, from_col],
       to_position: [row, col],
-      move_type: state,
+      move_type: move_type,
       game_id: game.id
     )
   end
@@ -117,5 +124,51 @@ class Piece < ApplicationRecord
   def enemy_at(check_row, check_col)
     enemy = game.piece_at(check_row, check_col)
     enemy if enemy && enemy.is_black != is_black
+  end
+
+  def get_path(to_row, to_col)
+    return nil if %w(Rook Bishop Queen).exclude?(type)
+    path = []
+    current_row = row
+    current_col = col
+    until current_row == to_row && current_col == to_col
+      current_row += to_row <=> current_row
+      current_col += to_col <=> current_col
+      path << [current_row, current_col]
+    end
+    path[0..-2]
+  end
+
+  def get_captive_id(move)
+    last_move_type, captured_piece_id = move.move_type.split
+    return captured_piece_id if last_move_type == 'capture'
+    nil
+  end
+
+  protected
+
+  def valid_move?(to_row, to_col)
+    return false if move_nil?(to_row, to_col)
+    return false if move_out_of_bounds?(to_row, to_col)
+    return false if move_destination_ally?(to_row, to_col)
+    return false unless move_legal?(to_row, to_col)
+    return false if move_obstructed?(to_row, to_col)
+    true
+  end
+
+  def self_check?(to_row, to_col)
+    return false unless move_to!(to_row, to_col)
+    checked = game.pieces.ally_king(is_black).first.in_check? ? true : false
+    undo_move!
+    checked
+  end
+
+  def cant_move?
+    (0..7).each do |check_row|
+      (0..7).each do |check_col|
+        return false if valid_move?(check_row, check_col) && !self_check?(check_row, check_col)
+      end
+    end
+    true
   end
 end
