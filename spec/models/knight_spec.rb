@@ -1,11 +1,6 @@
 require 'rails_helper'
 
 RSpec.describe Knight, type: :model do
-  WHITE_ROW = 2
-  WHITE_COL = 2
-  BLACK_ROW = 5
-  BLACK_COL = 5
-
   before(:all) do
     @white = User.create(
       email: 'white@foobar.com',
@@ -31,6 +26,11 @@ RSpec.describe Knight, type: :model do
   end
 
   describe '#move_legal?' do
+    let(:white_row) { 2 }
+    let(:white_col) { 2 }
+    let(:black_row) { 5 }
+    let(:black_col) { 5 }
+
     def row_two(knight)
       knight.is_black ? -2 : 2
     end
@@ -51,11 +51,11 @@ RSpec.describe Knight, type: :model do
       Piece.delete_all
       # square: 2,2
       white_knight = @game.pieces.create(
-        row: WHITE_ROW, col: WHITE_COL, type: Knight, is_black: false, user: @white
+        row: white_row, col: white_col, type: Knight, is_black: false, user: @white
       )
       # square: 5,5
       black_knight = @game.pieces.create(
-        row: BLACK_ROW, col: BLACK_COL, type: Knight, is_black: true, user: @black
+        row: black_row, col: black_col, type: Knight, is_black: true, user: @black
       )
       @knights = [white_knight, black_knight]
     end

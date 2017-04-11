@@ -3,4 +3,10 @@ class Rook < Piece
     return true if col == to_col || row == to_row
     false
   end
+
+  def path_to_king
+    king = game.pieces.where.not(is_black: is_black).where(type: 'King').first
+    return nil unless valid_move?(king.row, king.col)
+    get_path(king.row, king.col)
+  end
 end
