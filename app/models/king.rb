@@ -19,8 +19,6 @@ class King < Piece
     row == to_row && (col - to_col).abs == 2
   end
 
-  private
-
   def move_legal_castle?(to_col)
     return false unless moves.empty?
 

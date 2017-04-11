@@ -1,9 +1,13 @@
 class Pawn < Piece
   def move_legal?(to_row, to_col)
     return true if single_advance?(to_row, to_col)
+    logger.debug "single advance false. to_row = #{to_row}"
     return true if double_advance?(to_row, to_col)
+    logger.debug "double_advance false. to_row = #{to_row}"
     return true if capture_move?(to_row, to_col)
+    logger.debug "capture_move false"
     return true if en_passant?(to_row, to_col)
+    logger.debug "move_legal? will return false"
     false
   end
 

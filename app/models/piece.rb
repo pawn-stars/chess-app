@@ -18,11 +18,13 @@ class Piece < ApplicationRecord
   end
 
   def finalize_move!(to_row, to_col)
+    logger.debug "finalize_move for #{type}: #{id} at #{row}, #{col}"
     return false if self_check?(to_row, to_col)
     move_to!(to_row, to_col)
   end
 
   def move_to!(to_row, to_col)
+    logger.debug "move_to for #{type}: #{id} at #{row}, #{col}"
     return false unless valid_move?(to_row, to_col)
     captured_id = capture_piece(to_row, to_col)
     move_type = 'normal'
@@ -157,6 +159,7 @@ class Piece < ApplicationRecord
   end
 
   def self_check?(to_row, to_col)
+    logger.debug "self_check"
     return false unless move_to!(to_row, to_col)
     checked = game.pieces.ally_king(is_black).first.in_check? ? true : false
     undo_move!
