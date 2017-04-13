@@ -79,4 +79,9 @@ class Game < ApplicationRecord
   def piece_at(row, col)
     pieces.where(row: row, col: col).first
   end
+
+  def forfeit(current_user)
+    winner_id = current_user.id == white_player_id ? black_player_id : white_player_id
+    update_attributes(winner_id: winner_id, result: 'Forfeit')
+  end
 end
