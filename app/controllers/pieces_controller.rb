@@ -6,7 +6,8 @@ class PiecesController < ApplicationController
 
   def update
     piece = Piece.find(params[:id])
-    piece.finalize_move!(piece_params[:row].to_i, piece_params[:col].to_i)
+    move = piece.finalize_move!(piece_params[:row].to_i, piece_params[:col].to_i)
+    update_firebase(piece.game.id, piece.is_black) if move
     render json: piece.game.pieces
   end
 
@@ -14,5 +15,12 @@ class PiecesController < ApplicationController
 
   def piece_params
     params.require(:piece).permit(:row, :col)
+  end
+
+  def update_firebase(game_id, is_black)
+    firebase = Firebase::Client.new(ENV["databaseURL"])
+    turn = is_black ? 'White to move' : 'Black to move'
+    response = firebase.set(game_id, {turn: turn, created: Firebase::ServerValue::TIMESTAMP})
+    response.success?
   end
 end
