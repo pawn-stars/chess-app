@@ -53,6 +53,11 @@ class Game < ApplicationRecord
     !moves.empty && !moves.last.piece.is_black
   end
 
+  def set_turn
+    move_number = moves.count
+    move_number.even? ? white_player_id : black_player_id
+  end
+
   class Board
     attr_reader :grid
 
