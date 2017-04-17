@@ -14,9 +14,23 @@
   </div>
 </div>
 
-
-
+<script src="https://www.gstatic.com/firebasejs/3.7.6/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/3.7.6/firebase-database.js"></script>
 <script>
+  // Initialize Firebase
+  var config = {
+    apiKey: '<%= ENV["apiKey"] %>',
+    authDomain: '<%= ENV["authDomain"] %>',
+    databaseURL: '<%= ENV["databaseURL"] %>',
+    storageBucket: '<%= ENV["storageBucket"] %>'
+  };
+  firebase.initializeApp(config);
+
+  var piecesURL = $('.chessboard').data('pieces-url'); console.log(piecesURL);
+  var gameId = piecesURL.split('/')[2];
+  var firebaseGame = firebase.database().ref(gameId);
+  console.log(firebaseGame);
+
   var whitePieceHtml = {
     King: '&#9812;',
     Queen: '&#9813;',
@@ -33,13 +47,23 @@
     Knight: '&#9822;',
     Pawn: '&#9823;'
   };
-  var piecesURL = $('.chessboard').data('pieces-url');
 
   $(function() {
+    requestPieces();
 
-    $.get(piecesURL).success(function(pieces) {
-      updateBoard(pieces);
+    firebaseGame.on('value', function(snapshot) {
+      var turn = snapshot.val().turn;
+      var turnHtml = '<h2 class="turn">' + turn + '</h2>'
+      $('.turn').remove();
+      $('.booyah-box').append(turnHtml);
+      requestPieces();
     });
+
+    function requestPieces() {
+      $.get(piecesURL).success(function(pieces) {
+        updateBoard(pieces);
+      });
+    }
 
     function updateBoard(pieces) {
       $('.piece').remove();
