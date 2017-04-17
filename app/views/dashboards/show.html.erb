@@ -2,8 +2,5 @@
   <h1>My Profile</h1>
   <p>Screen Name: <%= current_user.screen_name %></p>
   <p>Member Since: <%= current_user.created_at.strftime("%m/%d/%Y") %></p>
-  <p><strong>Rating:</strong> <%= current_user.rating %></p>
-        <p><strong>Wins:</strong> <%= current_user.wins %></p>
-        <p><strong>Losses:</strong> <%= current_user.losses %></p>
-        <p><strong>Draws:</strong> <%= current_user.draws %></p>
+  <p>Games Played: <%= Participation.where(user_id: current_user.id).count %></p>
 </div>
