@@ -3,4 +3,13 @@
   <p>Screen Name: <%= current_user.screen_name %></p>
   <p>Member Since: <%= current_user.created_at.strftime("%m/%d/%Y") %></p>
   <p>Games Played: <%= Participation.where(user_id: current_user.id).count %></p>
+  <p>Wins: <%= Game.where(winner_id: current_user.id).count %></p>
+</div>
+
+<div class="container">
+  <% current_user.games_played.each do |games| %>
+    <h3 class="text-center">
+      <%= games.created_at.strftime("%m/%d/%Y") %>
+    </h3>
+  <% end %>
 </div>

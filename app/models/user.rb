@@ -7,6 +7,7 @@ class User < ApplicationRecord
   has_many :participations
   has_many :games, through: :participations
   has_many :pieces
+  has_many :games_played, through: :participations, source: :user
 
   validates :screen_name, presence: true,
                           length: { maximum: 16, minimum: 3 },
