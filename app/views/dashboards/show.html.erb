@@ -14,25 +14,15 @@
     </div>
     <div class="col-2 my-auto">
       <h4 class='text-center'>Losses</h4>
-      <h4 class="text-center"><%= Game.where(winner_id: current_user.id).count %></h4>
+      <h4 class="text-center"><%= Game.where(winner_id: current_user.id).count %> </h4>
     </div>
     <div class="col-2 my-auto">
       <h4 class='text-center'>Draws</h4>
       <h4 class="text-center"><%= Game.where(winner_id: current_user.id).count %></h4>
     </div>
   </div>
-
-
-
-
-
-
-
-
-<div class="container">
-  <% current_user.games_played.each do |games| %>
-    <h3 class="text-center">
-      <%= games.created_at.strftime("%m/%d/%Y") %>
-    </h3>
-  <% end %>
 </div>
+
+<br /><br />
+
+
