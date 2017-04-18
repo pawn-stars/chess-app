@@ -28,10 +28,15 @@ body {
   font-size: 26px;
 }
 
-.navbar-nav>li>a{
-  color: white;
-  padding-top: 15px;
-  padding-bottom: 15px;
+li.dropdown:last-child .dropdown-menu {
+  right: 0;
+  left: auto;
+  background-color: #DBD6D0;
+}
+
+.profile-image {
+  height: 200px;
+  width: 200px;
 }
 
 .chessboard {

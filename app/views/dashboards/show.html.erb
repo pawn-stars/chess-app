@@ -1,10 +1,33 @@
-<div class="container">
-  <h1>My Profile</h1>
-  <p>Screen Name: <%= current_user.screen_name %></p>
-  <p>Member Since: <%= current_user.created_at.strftime("%m/%d/%Y") %></p>
-  <p>Games Played: <%= Participation.where(user_id: current_user.id).count %></p>
-  <p>Wins: <%= Game.where(winner_id: current_user.id).count %></p>
-</div>
+<div class = "container">
+  <br />
+  <h2 class="text-center">Player Profile</h2>
+  <div class="row">
+    <div class="col-4">
+      <%= image_tag 'pawn.png', class: "profile-image" %>
+      <h5>Screen Name: <%= current_user.screen_name %></h5>
+      <h5>Member Since: <%= current_user.created_at.strftime("%m/%d/%Y") %></h5>
+      <h5>Games Played: <%= Participation.where(user_id: current_user.id).count %></h5>
+    </div>
+    <div class="col-2 my-auto">
+      <h4 class='text-center'>Wins</h4>
+      <h4 class="text-center"><%= Game.where(winner_id: current_user.id).count %></h4>
+    </div>
+    <div class="col-2 my-auto">
+      <h4 class='text-center'>Losses</h4>
+      <h4 class="text-center"><%= Game.where(winner_id: current_user.id).count %></h4>
+    </div>
+    <div class="col-2 my-auto">
+      <h4 class='text-center'>Draws</h4>
+      <h4 class="text-center"><%= Game.where(winner_id: current_user.id).count %></h4>
+    </div>
+  </div>
+
+
+
+
+
+
+
 
 <div class="container">
   <% current_user.games_played.each do |games| %>
