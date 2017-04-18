@@ -8,6 +8,4 @@ class Participation < ApplicationRecord
     return if Participation.where(game_id: game_id).count < 2
     errors.add(:game_id, "Game already has two players")
   end
-
-
 end
