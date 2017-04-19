@@ -18,7 +18,6 @@ class Piece < ApplicationRecord
   end
 
   def finalize_move!(to_row, to_col)
-    logger.debug "PIECE::finalize_move for #{type}: #{id} at #{row}, #{col}"
     return false if self_check?(to_row, to_col)
     move_to!(to_row, to_col)
   end
@@ -153,15 +152,12 @@ class Piece < ApplicationRecord
     return false if move_nil?(to_row, to_col)
     return false if move_out_of_bounds?(to_row, to_col)
     return false if move_destination_ally?(to_row, to_col)
-    logger.debug "Piece::valid_move? before call move_legal for #{type}.#{id}"
     return false unless move_legal?(to_row, to_col)
-    logger.debug "Piece::valid_move? after call move_legal"
     return false if move_obstructed?(to_row, to_col)
     true
   end
 
   def self_check?(to_row, to_col)
-    logger.debug "self_check"
     return false unless move_to!(to_row, to_col)
     checked = game.pieces.ally_king(is_black).first.in_check? ? true : false
     undo_move!
