@@ -49,7 +49,7 @@ RSpec.describe King, type: :model do
           row: WHITE_ROW, col: COL, type: King, is_black: false, user: @white
         )
         black_king = @game.pieces.create(
-          row: BLACK_ROW, col: COL, type: King, is_black: false, user: @black
+          row: BLACK_ROW, col: COL, type: King, is_black: true, user: @black
         )
         @kings = [white_king, black_king]
 
@@ -96,7 +96,6 @@ RSpec.describe King, type: :model do
 
       it "should not allow king to castle right with no rook" do
         @rooks[0].update_attributes(row: -1, col: -1)
-        @rooks[1].update_attributes(row: -1, col: -1)
         expect(@kings[0].move_legal?(WHITE_ROW, COL + 2)).to be_falsey
       end
 
@@ -123,8 +122,14 @@ RSpec.describe King, type: :model do
         expect(@kings[1].move_legal?(BLACK_ROW, COL - 2)).to be false
       end
 
-      # move_to! tests to verify that first move for king and/or rook
+      it "should not allow king castle: next square under attack" do
+        knight = @game.pieces.create(
+          row: 5, col: 4, type: knight, is_black: false, user: @white
+        )
+        expect(@kings[1].move_legal?(BLACK_ROW, COL + 2)).to be false
+      end
 
+      # move_to! tests to verify that first move for king and/or rook
       it "should not allow king to castle since not first king move" do
         king_move = @game.moves.create(
           move_number: 1,
@@ -147,6 +152,8 @@ RSpec.describe King, type: :model do
         )
         expect(@kings[1].move_to!(BLACK_ROW, COL - 2)).to be false
       end
+
+
     end
   end
 
