@@ -103,8 +103,20 @@ RSpec.describe King, type: :model do
         expect(@kings[0].move_legal?(WHITE_ROW, COL + 2)).to be true
       end
 
+      it "should move rook for king castle right" do
+        @kings[0].move_to!(WHITE_ROW, COL + 2)
+        @rooks[0].reload
+        expect(@rooks[0].col).to eq(ROOK_COL_RIGHT - 2)
+      end
+
       it "should allow king to castle left or queen-side" do
         expect(@kings[1].move_legal?(BLACK_ROW, COL - 2)).to be true
+      end
+
+      it "should move rook for king castle left" do
+        @kings[1].move_to!(BLACK_ROW, COL - 2)
+        @rooks[1].reload
+        expect(@rooks[1].col).to eq(ROOK_COL_LEFT + 3)
       end
 
       # rubocop:disable UselessAssignment
