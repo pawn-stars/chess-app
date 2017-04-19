@@ -152,8 +152,6 @@ RSpec.describe King, type: :model do
         )
         expect(@kings[1].move_to!(BLACK_ROW, COL - 2)).to be false
       end
-
-
     end
   end
 

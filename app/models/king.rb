@@ -37,7 +37,6 @@ class King < Piece
     return false unless rook
 
     # check intermediate square for attackers
-    attackers = get_attackers(row, col + (to_col <=> col))
     return false if get_attackers(row, col + (to_col <=> col)).present?
 
     # good castle - update rook column in DB
