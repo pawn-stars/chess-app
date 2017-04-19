@@ -3,11 +3,14 @@ class Rook < Piece
     col == to_col || row == to_row
   end
 
-  def can_castle_to?(king_col)
+  def king_rook_path_clear?(king_col)
     return false if move_obstructed?(row, king_col)
+    true
+  end
+
+  def update_rook_for_castle
     new_rook_col = col.zero? ? 3 : 5
     update_attributes(row: row, col: new_rook_col)
-    true
   end
 
   def path_to_king

@@ -1,7 +1,16 @@
 # rubocop:disable Metrics/AbcSize
 # rubocop:disable Style/SymbolProc
 class King < Piece
+  @rook_id = nil # used by piece to get castled rook ID
+
+  # ensure King didn't move itself into check
+  def finalize_move!(to_row, to_col)
+    return false if get_attackers(to_row, to_col).present?
+    move_to!(to_row, to_col)
+  end
+
   def move_legal?(to_row, to_col)
+    @rook_id = nil
     row_diff = (row - to_row).abs
     col_diff = (col - to_col).abs
     return true if row_diff <= 1 && col_diff <= 1
@@ -16,29 +25,32 @@ class King < Piece
   end
 
   def castling?(to_row, to_col)
-    row == to_row && (col - to_col).abs == 2
+    return "castle. rook: #{@rook_id}" if row == to_row && (col - to_col).abs == 2
+    "normal"
   end
 
   def move_legal_castle?(to_col)
     return false unless moves.empty?
 
+    # get the castling rook
     rook = get_castling_rook(to_col)
-    return unless rook
-    return false unless rook.can_castle_to?(col)
+    return false unless rook
+
+    # check intermediate square for attackers
+    return false if get_attackers(row, col + (to_col <=> col)).present?
+
+    # good castle - update rook column in DB
+    rook.update_rook_for_castle
+    @rook_id = rook.id
     true
   end
 
   def get_castling_rook(to_col)
     rook_col = col < to_col ? 7 : 0
     rook = game.piece_at(row, rook_col)
-    rook if rook && rook.moves.empty?
-  end
-
-  # override to enable castling
-  def finalize_move!(to_row, to_col)
-    return false if get_attackers(to_row, to_col).present?
-    move_to!(to_row, to_col)
-    # for castling something like: move_the_rook if castling?
+    return false unless rook && rook.moves.empty?
+    return rook if rook.king_rook_path_clear?(col)
+    false
   end
 
   def in_check?

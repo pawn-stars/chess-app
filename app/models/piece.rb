@@ -18,18 +18,18 @@ class Piece < ApplicationRecord
   end
 
   def finalize_move!(to_row, to_col)
-    logger.debug "finalize_move for #{type}: #{id} at #{row}, #{col}"
+    logger.debug "PIECE::finalize_move for #{type}: #{id} at #{row}, #{col}"
     return false if self_check?(to_row, to_col)
     move_to!(to_row, to_col)
   end
 
   def move_to!(to_row, to_col)
-    logger.debug "move_to for #{type}: #{id} at #{row}, #{col}"
     return false unless valid_move?(to_row, to_col)
+
+    # move_type = 'normal'
+    move_type = castling?(to_row, to_col)
     captured_id = capture_piece(to_row, to_col)
-    move_type = 'normal'
     move_type = "capture #{captured_id}" if captured_id
-    move_type = 'castle' if castling?(to_row, to_col)
 
     from_row = row
     from_col = col
@@ -71,7 +71,7 @@ class Piece < ApplicationRecord
   end
 
   def castling?(_to_row, _to_col)
-    false
+    "normal"
   end
 
   private
@@ -153,7 +153,9 @@ class Piece < ApplicationRecord
     return false if move_nil?(to_row, to_col)
     return false if move_out_of_bounds?(to_row, to_col)
     return false if move_destination_ally?(to_row, to_col)
+    logger.debug "Piece::valid_move? before call move_legal for #{type}.#{id}"
     return false unless move_legal?(to_row, to_col)
+    logger.debug "Piece::valid_move? after call move_legal"
     return false if move_obstructed?(to_row, to_col)
     true
   end
