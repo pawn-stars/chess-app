@@ -1,8 +1,6 @@
 # rubocop:disable Metrics/AbcSize
 # rubocop:disable Style/SymbolProc
 class King < Piece
-  @rook_id = nil # used by piece to get castled rook ID
-
   # ensure King didn't move itself into check
   def finalize_move!(to_row, to_col)
     return false if get_attackers(to_row, to_col).present?
@@ -10,7 +8,6 @@ class King < Piece
   end
 
   def move_legal?(to_row, to_col)
-    @rook_id = nil
     row_diff = (row - to_row).abs
     col_diff = (col - to_col).abs
     return true if row_diff <= 1 && col_diff <= 1
@@ -25,8 +22,8 @@ class King < Piece
   end
 
   def castling?(to_row, to_col)
-    return "castle. rook: #{@rook_id}" if row == to_row && (col - to_col).abs == 2
-    "normal"
+    return "normal" unless row == to_row && (col - to_col).abs == 2
+    col < to_col ? "castle. kingside" : "castle. queenside"
   end
 
   def move_legal_castle?(to_col)
@@ -41,7 +38,6 @@ class King < Piece
 
     # good castle - update rook column in DB
     rook.update_rook_for_castle
-    @rook_id = rook.id
     true
   end
 
