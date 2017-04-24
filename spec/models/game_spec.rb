@@ -83,4 +83,23 @@ RSpec.describe Game, type: :model do
       end
     end
   end
+
+  describe "#set_turn" do
+    it "sets the turn to white_player_id after the game is created" do
+      white = User.create(
+        email: 'white@foobar.com',
+        screen_name: 'white',
+        password: 'foobar',
+        password_confirmation: 'foobar'
+      )
+      black = User.create(
+        email: 'black@foobar.com',
+        screen_name: 'black',
+        password: 'foobar',
+        password_confirmation: 'foobar'
+      )
+      game = Game.create(white_player_id: white.id, black_player_id: black.id)
+      expect(game.set_turn).to eq(white.id)
+    end
+  end
 end
