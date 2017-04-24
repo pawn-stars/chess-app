@@ -1,19 +1,52 @@
 # rubocop:disable Metrics/AbcSize
 # rubocop:disable Style/SymbolProc
 class King < Piece
-  def move_legal?(to_row, to_col)
-    row_diff = (row - to_row).abs
-    col_diff = (col - to_col).abs
-    row_diff <= 1 && col_diff <= 1
-    # add castling moves to the 'whitelist', then verify the validity of the castle
-    #   further down in the logic
-  end
-
-  # override to enable castling
+  # ensure King didn't move itself into check
   def finalize_move!(to_row, to_col)
     return false if get_attackers(to_row, to_col).present?
     move_to!(to_row, to_col)
-    # for castling something like: move_the_rook if castling?
+  end
+
+  def move_legal?(to_row, to_col)
+    row_diff = (row - to_row).abs
+    col_diff = (col - to_col).abs
+    return true if row_diff <= 1 && col_diff <= 1
+
+    # King castling?
+    return false unless row_diff.zero? && col_diff == 2
+    move_legal_castle?(to_col)
+  end
+
+  def move_obstructed?(_to_row, _to_col)
+    false
+  end
+
+  def castling?(to_row, to_col)
+    return "normal" unless row == to_row && (col - to_col).abs == 2
+    col < to_col ? "castle. kingside" : "castle. queenside"
+  end
+
+  def move_legal_castle?(to_col)
+    return false unless moves.empty?
+
+    # get the castling rook
+    rook = get_castling_rook(to_col)
+    return false unless rook
+
+    # check intermediate square for attackers
+    return false if get_attackers(row, col + (to_col <=> col)).present?
+
+    # good castle - update rook column in DB
+    rook.update_rook_for_castle
+    true
+  end
+
+  def get_castling_rook(to_col)
+    rook_col = col < to_col ? 7 : 0
+    rook = game.piece_at(row, rook_col)
+    return false unless rook && rook.moves.empty?
+    return rook if rook.king_rook_path_clear?(col)
+    false
   end
 
   def in_check?

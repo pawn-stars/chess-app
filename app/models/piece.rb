@@ -24,8 +24,9 @@ class Piece < ApplicationRecord
 
   def move_to!(to_row, to_col)
     return false unless valid_move?(to_row, to_col)
+
+    move_type = castling?(to_row, to_col)
     captured_id = capture_piece(to_row, to_col)
-    move_type = 'normal'
     move_type = "capture #{captured_id}" if captured_id
 
     from_row = row
@@ -65,6 +66,10 @@ class Piece < ApplicationRecord
 
   def captured?
     row < 0 && col < 0
+  end
+
+  def castling?(_to_row, _to_col)
+    "normal"
   end
 
   private
